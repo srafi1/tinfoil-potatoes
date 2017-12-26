@@ -8,28 +8,15 @@ In-terminal implementation of the Exploding Kittens card game over a network.
 
 ## File Structure
 ```
-static/
-  images/
-   |  tacoCat.png
-   |  tacoCatCursor.png
-  styles/
-   |  style.css
-templates/
- |  base.html
- |  create_story.html
- |  display.html
- |  edit_story.html
- |  list.html
- |  login.html
- |  register.html
- |  welcome.html
-README.md
-changes.txt
-db_builder.py
-design.pdf
-devlog.txt
+cards.c
+client.c
+DESIGN
+DEVLOG
 log.sh
-login.py
+makefile
+networking.c
+README.md
+server.c
 ```
 
 ## Launch Instructions

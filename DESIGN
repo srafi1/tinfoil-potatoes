@@ -1,0 +1,64 @@
+Tinfoil Potatoes
+Mansour Elsharawy, Shakil Rafi, Henry Zheng
+Systems pd4
+Project2 -- The Final Frontier
+2017-12-27
+
+===== Description =====
+In-terminal implementation of the Exploding Kittens card game over a network. The objective of the game is to avoid drawing an “exploding kitten” card from the deck, which “kills” the player, thus rendering them out of the game. Players can use cards such as “skip” or “draw from bottom” to avoid drawing an “exploding kitten” card.
+
+For the full set of rules and mechanics, visit the following link: https://www.fgbradleys.com/rules/rules2/ExplodingKittens-rules.pdf 
+
+===== User Interface =====
+Each player is shown a waiting screen with until it is their turn to move. The overall status of the game is printed out to the screen after every player completes their turn including number of cards left in the deck, number of cards left in each player’s hand, your current hand, and number of “exploding kitten” cards left in the deck.
+
+When it is your turn, you can enter a command to display help text, learn what a card does, draw a card, display the current status of the game again, or play a card from your hand.
+
+Players that have lost are still shown updated statuses of the game until the game is over. 
+
+The endgame screen shows the order in which players lost and the winner.
+
+Summary of User Experience:	
+1. Server is run by one player
+2. All players (including host) run the client program to join the game
+    a. Each player enters their name to be displayed in-game.
+    b. They are shown a waiting screen until the game starts.
+    c. Afterwards, they are shown a screen as described under User Interface. 
+3. Host indicates to server program that all players have connected and the game should begin.
+4. The game goes on until there is one player remaining.
+5. The endgame screen is displayed and both client and server programs exit.
+
+===== Technical Design =====
+Concepts used in class:
+- Networking (to be learned)
+- Use of structs (A head->tail linked list will be used by the server to determine which client’s turn is next)
+- Server-client relationships (and any pipes/forks necessary to make those work)
+- Memory allocation
+- Reading and parsing input from stdin
+
+Data structures to be used:
+- The head->tail linked list of nodes as described earlier
+- Malloc’d arrays to be used by the server to keep track of the cards still in the deck
+- Malloc’d arrays to be used by each client to keep track of their hands
+- Pipes/Sockets as necessary to set up the server-client relationships
+
+Algorithms to be used:
+- An algorithm that will have the server parse through the circular linked list keeping track of turn-based play and reverse the order of the linkages in order to properly implement the “reverse” card.
+
+Roles & Responsibilities:
+	Shakil Rafi - Server-client connections and passing data around
+	Mansour Elsharawy - Card/deck setup and displaying game status
+	Henry Zheng - Implementing game rules and specific card effects
+
+===== Timeline =====
+[2018-01-05] Have a basic server system to connect multiple users through networking
+[2018-01-08] Complete card/deck structs and syncing them between server and clients
+[2018-01-10] Displaying game status and cycling through turns
+[2018-01-13] Playing cards with desired effects
+[2018-01-15] Implementing exploding kittens and endgame screen
+
+Extra features (if time permits):
+- Display everything in the terminal with updates to the screen instead of re-printing everything
+- Show/hide hand on keypress
+- Text animations for drawing/playing cards
+
