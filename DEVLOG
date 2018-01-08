@@ -14,3 +14,9 @@ Project2 -- The Final Frontier
 shakilR -- 2017-12-26 16:59
 created empty files for project structure
 
+shakilR -- 2018-01-08 01:00
+set up server
+made sure all clients are up to date with the game state
+set up shared memory to synchronize game state between subservers
+set up taking input from clients to be sent to all servers
+
