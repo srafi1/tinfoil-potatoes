@@ -20,3 +20,6 @@ made sure all clients are up to date with the game state
 set up shared memory to synchronize game state between subservers
 set up taking input from clients to be sent to all servers
 
+elsharawyM -- 2018-01-09 10:54
+fixed shmem error
+

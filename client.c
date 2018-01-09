@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
         //read update
         read(server_socket, buffer, sizeof(buffer));
         int turn;
-        char* data;
+        char data[256];
         sscanf(buffer, "%d %s", &turn, data);
         printf("Current data: %s\n", data);
 
