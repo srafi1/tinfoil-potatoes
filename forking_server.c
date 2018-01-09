@@ -128,7 +128,7 @@ void subserver(int client_socket, int index) {
     semop(sem_desc, &sb, 1);
 
     read(client_socket, buffer, 15);
-    printf("subserver %d] player name: %s\n", getpid(), buffer);
+    printf("[subserver %d] player name: %s\n", getpid(), buffer);
     //copy char by char because assigning a pointer directly won't work with shm
     strncpy(mem_loc->players[index], buffer, 15);
 
@@ -226,7 +226,7 @@ void post_setup(int num_players) {
             for (i = 0; i < num_players; i++) {
                 mem_loc->received_update[i] = 0;
             }
-            printf("Player turn: %d\n", mem_loc->current_player);
+            printf("Player #%d turn: %s\n", mem_loc->current_player, mem_loc->players[mem_loc->current_player]);
         } else {
             //printf("waiting on someone to get update\n");
         }
