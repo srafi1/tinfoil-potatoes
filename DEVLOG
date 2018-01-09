@@ -23,3 +23,6 @@ set up taking input from clients to be sent to all servers
 elsharawyM -- 2018-01-09 10:54
 fixed shmem error
 
+elsharawyM -- 2018-01-09 11:04
+scanf fix
+
