@@ -9,6 +9,22 @@
 #define SHM_KEY 1776
 #define MAX_PLAYERS 6
 
+//CARD ID PLACEHOLDERS
+#define EXPLODING_KITTEN 0
+#define DEFUSE 1
+#define ATTACK 2
+#define SKIP 3
+#define FAVOR 4
+#define SHUFFLE 5
+#define SEE_THE_FUTURE 6 
+#define NOPE 7
+#define TACOCAT 8
+#define WATERMELON_CAT 9
+#define POTATO_CAT 10
+#define BEARD_CAT 11
+#define RAINBOW_CAT 12
+
+
 void process(char *s);
 void subserver(int from_client, int index);
 void setup_shm();
@@ -23,9 +39,10 @@ union semun {
 };
 
 struct game_state {
-    char players[6][15];
+    char players[6][15]; // TODO: ask user for better name if longer than 13 chars
     int current_player;
-    int deck[30]; //TODO: change 30 to number of possible cards in a deck
+    int deck[57]; //52 normal cards + (playercount-1) EK
+    int discard[57];
     int cards_left;
     int turn_completed;
     int received_update[6];
