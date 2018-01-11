@@ -6,6 +6,7 @@
 #include <sys/sem.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <time.h>
 #define SEM_KEY 1492
 #define SHM_KEY 1776
 #define MAX_PLAYERS 6
@@ -232,6 +233,7 @@ void post_setup(int num_players) {
             }
 	    
 	    init_deck(mem_loc);
+	    shuffle_deck(mem_loc);
 	    for(i = 0; i < 57; i++){
 	      printf("deck[%d]: %d\n",i,(mem_loc->deck)[i]);
 	    }
@@ -288,7 +290,29 @@ void init_deck(struct game_state *state){
       (state->deck)[i] = NONE;
     }
   }
+}
 
+void shuffle_deck(struct game_state *state){
+  //Find point of array before "NONE (13)"
+  int i = 0;
+  int end = 57;
+  for(i;i < 57; i++){
+    if((state->deck)[i] == 13){
+      end = i;
+      break;
+    }
+  }
+
+  //Shuffle by iterating and swapping with random indices
+  i = 0;
+  srand(time(NULL));
+  int randint, temp;
+  for(i; i<end; i++){
+    randint = rand() % end;
+    temp = (state->deck)[i];
+    (state->deck)[i] = (state->deck)[randint];
+    (state->deck)[randint] = temp;
+  }
 }
 
 void process(char * s) {
