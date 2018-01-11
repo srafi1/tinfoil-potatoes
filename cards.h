@@ -1,0 +1,15 @@
+//CARD ID PLACEHOLDERS
+#define EXPLODING_KITTEN 0
+#define DEFUSE 1
+#define ATTACK 2
+#define SKIP 3
+#define FAVOR 4
+#define SHUFFLE 5
+#define SEE_THE_FUTURE 6 
+#define NOPE 7
+#define TACOCAT 8
+#define WATERMELON_CAT 9
+#define POTATO_CAT 10
+#define BEARD_CAT 11
+#define RAINBOW_CAT 12
+#define NONE 13

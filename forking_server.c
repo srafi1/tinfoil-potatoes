@@ -1,4 +1,5 @@
 #include "networking.h"
+#include "cards.h"
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -9,20 +10,6 @@
 #define SHM_KEY 1776
 #define MAX_PLAYERS 6
 
-//CARD ID PLACEHOLDERS
-#define EXPLODING_KITTEN 0
-#define DEFUSE 1
-#define ATTACK 2
-#define SKIP 3
-#define FAVOR 4
-#define SHUFFLE 5
-#define SEE_THE_FUTURE 6 
-#define NOPE 7
-#define TACOCAT 8
-#define WATERMELON_CAT 9
-#define POTATO_CAT 10
-#define BEARD_CAT 11
-#define RAINBOW_CAT 12
 
 
 void process(char *s);
@@ -243,6 +230,11 @@ void post_setup(int num_players) {
             for (i = 0; i < num_players; i++) {
                 mem_loc->received_update[i] = 0;
             }
+	    
+	    init_deck(mem_loc);
+	    for(i = 0; i < 57; i++){
+	      printf("deck[%d]: %d\n",i,(mem_loc->deck)[i]);
+	    }
             printf("Player #%d turn: %s\n", mem_loc->current_player, mem_loc->players[mem_loc->current_player]);
         } else {
             //printf("waiting on someone to get update\n");
@@ -251,6 +243,52 @@ void post_setup(int num_players) {
         sb.sem_op = 1;
         semop(sem_desc, &sb, 1);
     }
+}
+
+void init_deck(struct game_state *state){
+  int i = 0;
+  for(i;i<57;i++){
+    if(i < 4){
+      (state->deck)[i] = ATTACK;
+    }
+    else if(i < 8){
+      (state->deck)[i] = SKIP;
+    }
+    else if(i < 12){
+      (state->deck)[i] = FAVOR;
+    }
+    else if(i < 16){
+      (state->deck)[i] = SHUFFLE;
+    }
+    else if(i < 21){
+      (state->deck)[i] = SEE_THE_FUTURE;
+    }
+    else if(i < 26){
+      (state->deck)[i] = NOPE;
+    }
+    else if(i < 30){
+      (state->deck)[i] = TACOCAT;
+    }
+    else if(i < 34){
+      (state->deck)[i] = WATERMELON_CAT;
+    }
+    else if(i < 38){
+      (state->deck)[i] = POTATO_CAT;
+    }
+    else if(i < 42){
+      (state->deck)[i] = BEARD_CAT;
+    }
+    else if(i < 46){
+      (state->deck)[i] = RAINBOW_CAT;
+    }
+    else if(i < 52){
+      (state->deck)[i] = DEFUSE;
+    }
+    else{
+      (state->deck)[i] = NONE;
+    }
+  }
+
 }
 
 void process(char * s) {

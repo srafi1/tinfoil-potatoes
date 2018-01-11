@@ -3,6 +3,7 @@
 int main(int argc, char **argv) {
 
     int server_socket;
+    int hand[57];
     char buffer[BUFFER_SIZE];
 
     if (argc == 2)

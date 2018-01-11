@@ -32,3 +32,6 @@ added character names to print statements
 elsharawyM -- 2018-01-10 10:49
 formalized deck size and created card IDs
 
+elsharawyM -- 2018-01-10 21:43
+started server deck initialization, gave clients a hand array (uninitialized), and card definitions
+
