@@ -249,7 +249,15 @@ void post_setup(int num_players) {
 
 void init_deck(struct game_state *state){
   int i = 0;
-  for(i;i<57;i++){
+  int playercount = 0;
+  for(i;i<6;i++){
+    printf("[%s]\n",(state->players)[i]);
+    if((state->players)[i][0]){
+      playercount++;
+    }
+  }
+  printf("num players: %d\n",playercount);
+  for(i = 0;i<57;i++){
     if(i < 4){
       (state->deck)[i] = ATTACK;
     }
@@ -283,7 +291,7 @@ void init_deck(struct game_state *state){
     else if(i < 46){
       (state->deck)[i] = RAINBOW_CAT;
     }
-    else if(i < 52){
+    else if(i < (52-playercount)){
       (state->deck)[i] = DEFUSE;
     }
     else{

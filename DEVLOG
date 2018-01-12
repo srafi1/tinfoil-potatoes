@@ -38,3 +38,6 @@ started server deck initialization, gave clients a hand array (uninitialized), a
 elsharawyM -- 2018-01-10 23:07
 created shuffle_deck
 
+elsharawyM -- 2018-01-11 19:54
+removed defuse cards from base deck for each player
+
