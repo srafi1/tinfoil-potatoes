@@ -43,6 +43,7 @@ void post_setup(int num_players);
 void deal_deck(struct game_state*);
 void shuffle_deck(struct game_state*);
 void init_deck(struct game_state*);
+void insert_kitties(struct game_state*);
 
 
 int subserver_pids[MAX_PLAYERS];
@@ -221,6 +222,8 @@ void post_setup(int num_players) {
     init_deck(mem_loc);
     shuffle_deck(mem_loc);
     deal_deck(mem_loc);
+    insert_kitties(mem_loc);
+    shuffle_deck(mem_loc);
 
     while (1) {
         sb.sem_op = -1;
@@ -373,6 +376,36 @@ void deal_deck(struct game_state *state){
     }
   }
 }
+
+void insert_kitties(struct game_state* state){
+  int i = 0;
+  int playercount = 0;
+  for(i;i<6;i++){
+    //printf("[%s]\n",(state->players[i]).name);
+    if((state->players[i]).name[0]){
+      playercount++;
+    }
+  }
+
+  //Find point of array before "NONE (13)"
+  i = 0;
+  int end = 57;
+  for(i;i < 57; i++){
+    if((state->deck)[i] == NONE){
+      end = i;
+      break;
+    }
+  }
+
+
+  i = 0;
+  for(i;i<playercount-1;i++){
+    state->deck[end] = EXPLODING_KITTEN;
+    end++;
+  }
+}
+
+
 
 void process(char * s) {
     while (*s) {
