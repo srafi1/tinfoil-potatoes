@@ -7,6 +7,9 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <time.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #define SEM_KEY 1492
 #define SHM_KEY 1776
 #define MAX_PLAYERS 6
@@ -165,8 +168,26 @@ void subserver(int client_socket, int index) {
                         //printf("subserver #%d did not receive the update\n", i);
                     }
                 }
+		/*
+		    i = 0;
+  j = 0;
+  for(i;i<6;i++){
+    if((state->players[i]).name[0]){
+      printf("[%s]'s hand: \n", (state->players[i]).name);
+      j = 0;
+      for(j;j<20;j++){
+	printf("[%d] ", (state->players[i]).hand[j]);
+      }
+      printf("\n");
+    }
+  }
+		*/
                 if (all_received_update) {
                     strcpy(buffer, "1 ");
+		    int j = 0;
+		    for (j;j<20;j++){
+		      strcat(mem_loc->testing, itoa(mem_loc->players[index].hand[j]));
+		    }
                     strcat(buffer, mem_loc->testing);
                     write(client_socket, buffer, BUFFER_SIZE);
                     read(client_socket, buffer, BUFFER_SIZE);
