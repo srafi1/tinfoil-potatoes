@@ -215,6 +215,10 @@ void post_setup(int num_players) {
     sb.sem_op = 1;
     semop(sem_desc, &sb, 1);
 
+    init_deck(mem_loc);
+    shuffle_deck(mem_loc);
+    deal_deck(mem_loc);
+
     while (1) {
         sb.sem_op = -1;
         semop(sem_desc, &sb, 1);
@@ -237,9 +241,6 @@ void post_setup(int num_players) {
                 mem_loc->received_update[i] = 0;
             }
 	    
-	    init_deck(mem_loc);
-	    shuffle_deck(mem_loc);
-	    deal_deck(mem_loc);
 	    for(i = 0; i < 57; i++){
 	      printf("deck[%d]: %d\n",i,(mem_loc->deck)[i]);
 	    }
