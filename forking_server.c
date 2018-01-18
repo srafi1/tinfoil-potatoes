@@ -26,8 +26,13 @@ union semun {
     struct seminfo *__buf;
 };
 
+struct player{
+  char name[15];
+  int hand[20];
+};
+  
 struct game_state {
-    char players[6][15]; // TODO: ask user for better name if longer than 13 chars
+    struct player players[6]; // TODO: ask user for better name if longer than 13 chars
     int current_player;
     int deck[57]; //52 normal cards + (playercount-1) EK
     int discard[57];
@@ -111,7 +116,7 @@ void setup_shm() {
     struct game_state* mem_loc = (struct game_state*) shmat(mem_desc, 0, 0);
     int i;
     for (i = 0; i < 6; i++) {
-        mem_loc->players[i][0] = 0;
+      (mem_loc->players[i]).name[0] = 0;
     }
     mem_loc->current_player = -1;
     //printf("starting value: %s\n", mem_loc);
@@ -135,7 +140,7 @@ void subserver(int client_socket, int index) {
     read(client_socket, buffer, 15);
     printf("[subserver %d] player name: %s\n", getpid(), buffer);
     //copy char by char because assigning a pointer directly won't work with shm
-    strncpy(mem_loc->players[index], buffer, 15);
+    strncpy((mem_loc->players[index]).name, buffer, 15);
 
     sb.sem_op = 1;
     semop(sem_desc, &sb, 1);
@@ -195,7 +200,7 @@ void post_setup(int num_players) {
 
     printf("Players: \n");
     for (int i = 0; i < num_players; i++) {
-        printf("%s\n", mem_loc->players[i]);
+      printf("%s\n", (mem_loc->players[i]).name);
     }
     mem_loc->testing[0] = 0;
     int i;
@@ -237,7 +242,7 @@ void post_setup(int num_players) {
 	    for(i = 0; i < 57; i++){
 	      printf("deck[%d]: %d\n",i,(mem_loc->deck)[i]);
 	    }
-            printf("Player #%d turn: %s\n", mem_loc->current_player, mem_loc->players[mem_loc->current_player]);
+            printf("Player #%d turn: %s\n", mem_loc->current_player, (mem_loc->players[mem_loc->current_player]).name);
         } else {
             //printf("waiting on someone to get update\n");
         }
@@ -251,8 +256,8 @@ void init_deck(struct game_state *state){
   int i = 0;
   int playercount = 0;
   for(i;i<6;i++){
-    printf("[%s]\n",(state->players)[i]);
-    if((state->players)[i][0]){
+    printf("[%s]\n",(state->players[i]).name);
+    if((state->players[i]).name[0]){
       playercount++;
     }
   }
