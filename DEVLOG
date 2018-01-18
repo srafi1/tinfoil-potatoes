@@ -50,3 +50,6 @@ dealt out cards accordingly to players in game_state struct
 elsharawyM -- 2018-01-17 21:13
 fixed reshuffling and redealing on each turn
 
+elsharawyM -- 2018-01-18 10:25
+headers added to top of file
+

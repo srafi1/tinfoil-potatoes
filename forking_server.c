@@ -11,14 +11,6 @@
 #define SHM_KEY 1776
 #define MAX_PLAYERS 6
 
-
-
-void process(char *s);
-void subserver(int from_client, int index);
-void setup_shm();
-void sighandler(int signum);
-void post_setup(int num_players);
-
 union semun {
     int val;
     struct semid_ds *buf;
@@ -41,6 +33,17 @@ struct game_state {
     int received_update[6];
     char testing[BUFFER_SIZE];
 };
+
+
+void process(char *s);
+void subserver(int from_client, int index);
+void setup_shm();
+void sighandler(int signum);
+void post_setup(int num_players);
+void deal_deck(struct game_state*);
+void shuffle_deck(struct game_state*);
+void init_deck(struct game_state*);
+
 
 int subserver_pids[MAX_PLAYERS];
 
