@@ -44,3 +44,6 @@ removed defuse cards from base deck for each player
 elsharawyM -- 2018-01-17 19:30
 set up player struct and successfully implemented it
 
+elsharawyM -- 2018-01-17 21:08
+dealt out cards accordingly to players in game_state struct
+

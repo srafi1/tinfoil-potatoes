@@ -239,6 +239,7 @@ void post_setup(int num_players) {
 	    
 	    init_deck(mem_loc);
 	    shuffle_deck(mem_loc);
+	    deal_deck(mem_loc);
 	    for(i = 0; i < 57; i++){
 	      printf("deck[%d]: %d\n",i,(mem_loc->deck)[i]);
 	    }
@@ -325,6 +326,47 @@ void shuffle_deck(struct game_state *state){
     temp = (state->deck)[i];
     (state->deck)[i] = (state->deck)[randint];
     (state->deck)[randint] = temp;
+  }
+}
+
+void deal_deck(struct game_state *state){
+  //Find point of array before "NONE (13)"
+  int i = 0;
+  int end = 57;
+  for(i;i < 57; i++){
+    if((state->deck)[i] == 13){
+      end = i;
+      break;
+    }
+  }
+
+  
+  i = 0;
+  int j;
+  for(i;i<6;i++){
+    j = 0;
+    if((state->players[i]).name[0]){
+      (state->players[i]).hand[0] = DEFUSE;
+      for(j;j<4;j++){
+	(state->players[i]).hand[j+1] = state->deck[end-1];
+	state->deck[end-1] = NONE;
+	end--;
+      }
+      (state->players[i]).hand[j+1] = NONE;
+    }
+  }
+
+  i = 0;
+  j = 0;
+  for(i;i<6;i++){
+    if((state->players[i]).name[0]){
+      printf("[%s]'s hand: \n", (state->players[i]).name);
+      j = 0;
+      for(j;j<20;j++){
+	printf("[%d] ", (state->players[i]).hand[j]);
+      }
+      printf("\n");
+    }
   }
 }
 
