@@ -58,10 +58,11 @@ int main() {
     int listen_socket;
     int f;
     listen_socket = server_setup();
+    printf("%d\n",listen_socket);
 
     printf("Press [ENTER] when all players have connected\n");
     if (fork() == 0) {
-        getchar();
+      getchar();
         //stop accepting connections from socket
         shutdown(listen_socket, SHUT_RD);
         return 0;
@@ -74,7 +75,8 @@ int main() {
     }
 
     while (current_player < MAX_PLAYERS) {
-        int client_socket = server_connect(listen_socket);
+      
+	int client_socket = server_connect(listen_socket);
         if (client_socket == -1) {
             printf("Stopped accepting connections\n");
             break;
