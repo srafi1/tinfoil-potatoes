@@ -186,7 +186,13 @@ void subserver(int client_socket, int index) {
                     strcpy(buffer, "1 ");
 		    int j = 0;
 		    for (j;j<20;j++){
-		      strcat(mem_loc->testing, itoa(mem_loc->players[index].hand[j]));
+		      int card = (mem_loc->players[index]).hand[j];
+		      if(card == NONE){
+			break;
+		      }
+		      char temp[256];
+		      sprintf(temp,"[%d] ", card);
+		      strcat(mem_loc->testing, temp);
 		    }
                     strcat(buffer, mem_loc->testing);
                     write(client_socket, buffer, BUFFER_SIZE);
