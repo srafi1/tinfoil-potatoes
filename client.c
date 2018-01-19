@@ -5,6 +5,7 @@ int main(int argc, char **argv) {
     int server_socket;
     int hand[57];
     char buffer[BUFFER_SIZE];
+    memset(buffer,0,BUFFER_SIZE);
 
     if (argc == 2)
         server_socket = client_setup( argv[1]);

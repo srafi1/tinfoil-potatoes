@@ -138,6 +138,7 @@ void subserver(int client_socket, int index) {
     struct game_state* mem_loc = (struct game_state*) shmat(mem_desc, 0, 0);
 
     char buffer[BUFFER_SIZE];
+    memset(buffer,0,BUFFER_SIZE);
 
     struct sembuf sb;
     sb.sem_op = -1;
