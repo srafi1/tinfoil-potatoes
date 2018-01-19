@@ -121,6 +121,7 @@ void setup_shm() {
 
     int mem_desc = shmget(SHM_KEY, sizeof(struct game_state), 0600 | IPC_CREAT | IPC_EXCL);
     struct game_state* mem_loc = (struct game_state*) shmat(mem_desc, 0, 0);
+    memset(mem_loc, 0, sizeof(mem_loc));
     int i;
     for (i = 0; i < 6; i++) {
       (mem_loc->players[i]).name[0] = 0;
