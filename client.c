@@ -23,6 +23,7 @@ int main(int argc, char **argv) {
         read(server_socket, buffer, sizeof(buffer));
         int turn;
         char data[256];
+	memset(data,0,256);
         sscanf(buffer, "%d  %[^\t\n]s", &turn, data);
         printf("Current data: %s\n", data);
 
