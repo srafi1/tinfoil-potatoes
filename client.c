@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
   while (1) {
     //read update
     read(server_socket, buffer, sizeof(buffer));
-    printf("Received [%s] from server\n", buffer);
+    //printf("Received [%s] from server\n", buffer);
     int turn;
     char data[256];
     memset(data,0,256);
@@ -34,8 +34,7 @@ int main(int argc, char **argv) {
       fgets(buffer, sizeof(buffer), stdin);
       *strchr(buffer, '\n') = 0;
       write(server_socket, buffer, sizeof(buffer));
-      printf("Sent [%s] to server\n", buffer);
-      printf("Waiting for turn...\n");
+      //printf("Sent [%s] to server\n", buffer);
     }
   }
 }

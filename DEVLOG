@@ -65,3 +65,6 @@ each player's hand is now shown on every turn, even if not their own
 elsharawyM -- 2018-01-24 00:20
 tried to start a process function to start making user input meaningful
 
+elsharawyM -- 2018-01-24 01:39
+fixed the bug and now players can draw cards from the pile!
+
