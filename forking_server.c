@@ -49,6 +49,7 @@ void init_deck(struct game_state*);
 void insert_kitties(struct game_state*);
 void process_action(int client_socket, struct game_state *state, char * buffer, int playerindex);
 char * draw(struct game_state *state, int playerindex);
+char * cardtotext(int cardid);
 
 
 int subserver_pids[MAX_PLAYERS];
@@ -187,7 +188,7 @@ void subserver(int client_socket, int index) {
 			break;
 		      }
 		      char temp[256];
-		      sprintf(temp,"[%d] ", card);
+		      sprintf(temp,"[%s] ", cardtotext(card));
 		      strcat(mem_loc->testing, temp);
 		    }
                     strcat(buffer, mem_loc->testing);
@@ -212,7 +213,7 @@ void subserver(int client_socket, int index) {
 		  break;
 		}
 		char temp[256];
-		sprintf(temp,"[%d] ", card);
+		sprintf(temp,"[%s] ", cardtotext(card));
 		strcat(mem_loc->testing, temp);
 	      }
 	      strcat(buffer, mem_loc->testing);
@@ -288,7 +289,7 @@ void post_setup(int num_players) {
             }
 	    
 	    for(i = 0; i < 57; i++){
-	      printf("deck[%d]: %d\n",i,(mem_loc->deck)[i]);
+	      printf("deck[%d]: %s\n",i,cardtotext((mem_loc->deck)[i]));
 	    }
             printf("Player #%d turn: %s\n", mem_loc->current_player, (mem_loc->players[mem_loc->current_player]).name);
         } else {
@@ -321,7 +322,7 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
 	break;
       }
       char temp[256];
-      sprintf(temp,"[%d] ", card);
+      sprintf(temp,"[%s] ", cardtotext(card));
       strcat(state->testing, temp);
     }
     strcat(output, state->testing);
@@ -360,11 +361,57 @@ char * draw(struct game_state *state, int playerindex){
   //Returns a string of what card the player drew
   char * outputstring = malloc(BUFFER_SIZE);
   char temp[BUFFER_SIZE];
-  sprintf(temp," You drew a [%d]!\n",drawncard);
+  sprintf(temp," You drew a [%s]!\n",cardtotext(drawncard));
   strcpy(outputstring, temp);
   return outputstring;
 
   
+}
+
+char * cardtotext(int cardid){
+  char * result = malloc(30);
+
+  if(cardid == 0){
+    strcpy(result,"EXPLODING KITTEN");
+  }
+  else if(cardid == 1){
+    strcpy(result,"DEFUSE");
+  }
+  else if(cardid == 2){
+    strcpy(result,"ATTACK");
+  }
+  else if(cardid == 3){
+    strcpy(result,"SKIP");
+  }
+  else if(cardid == 4){
+    strcpy(result,"FAVOR");
+  }
+  else if(cardid == 5){
+    strcpy(result,"SHUFFLE");
+  }
+  else if(cardid == 6){
+    strcpy(result,"SEE THE FUTURE");
+  }
+  else if(cardid == 7){
+    strcpy(result,"NOPE");
+  }
+  else if(cardid == 8){
+    strcpy(result,"TACOCAT");
+  }
+  else if(cardid == 9){
+    strcpy(result,"CATTERMELON");
+  }
+  else if(cardid == 10){
+    strcpy(result,"POTATO CAT");
+  }
+  else if(cardid == 11){
+    strcpy(result,"BEARD CAT");
+  }
+  else if(cardid == 12){
+    strcpy(result,"RAINBOW RALPHING CAT");
+  }
+
+  return result;
 }
 
 void init_deck(struct game_state *state){

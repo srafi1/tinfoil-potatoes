@@ -68,3 +68,6 @@ tried to start a process function to start making user input meaningful
 elsharawyM -- 2018-01-24 01:39
 fixed the bug and now players can draw cards from the pile!
 
+elsharawyM -- 2018-01-24 02:07
+added number to text conversion for user readability
+
