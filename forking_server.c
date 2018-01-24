@@ -189,6 +189,8 @@ void subserver(int client_socket, int index) {
                 if (all_received_update) {
                     strcpy(buffer, "1 ");
 		    int j = 0;
+		    memset(mem_loc->testing,0,BUFFER_SIZE);
+		    strcat(buffer, "Your hand: ");
 		    for (j;j<20;j++){
 		      int card = (mem_loc->players[index]).hand[j];
 		      if(card == NONE){
@@ -205,11 +207,24 @@ void subserver(int client_socket, int index) {
                     mem_loc->turn_completed = 1;
                     mem_loc->received_update[index] = 1;
                 }
-            } else {
-                strcpy(buffer, "0 ");
-                strcat(buffer, mem_loc->testing);
-                write(client_socket, buffer, BUFFER_SIZE);
-                mem_loc->received_update[index] = 1;
+            }
+	    else {
+	      strcpy(buffer, "0 ");
+	      int j = 0;
+	      memset(mem_loc->testing,0,BUFFER_SIZE);
+	      strcat(buffer, "Your hand: ");
+	      for (j;j<20;j++){
+		int card = (mem_loc->players[index]).hand[j];
+		if(card == NONE){
+		  break;
+		}
+		char temp[256];
+		sprintf(temp,"[%d] ", card);
+		strcat(mem_loc->testing, temp);
+	      }
+	      strcat(buffer, mem_loc->testing);
+	      write(client_socket, buffer, BUFFER_SIZE);
+	      mem_loc->received_update[index] = 1;
             }
         }
 

@@ -26,10 +26,10 @@ int main(int argc, char **argv) {
         char data[256];
 	memset(data,0,256);
         sscanf(buffer, "%d  %[^\t\n]s", &turn, data);
-        printf("Current data: %s\n", data);
+        printf("%s\n", data);
 
         if (turn) {
-            printf("Enter new data: ");
+            printf("Your move: ");
             fgets(buffer, sizeof(buffer), stdin);
             *strchr(buffer, '\n') = 0;
             write(server_socket, buffer, sizeof(buffer));
