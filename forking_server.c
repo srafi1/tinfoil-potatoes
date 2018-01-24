@@ -50,6 +50,7 @@ void insert_kitties(struct game_state*);
 void process_action(int client_socket, struct game_state *state, char * buffer, int playerindex);
 char * draw(struct game_state *state, int playerindex);
 char * cardtotext(int cardid);
+char * thefuture();
 
 
 int subserver_pids[MAX_PLAYERS];
@@ -131,6 +132,9 @@ void setup_shm() {
     for (i = 0; i < 6; i++) {
       (mem_loc->players[i]).name[0] = 0;
     }
+    for(i=0; i<6; i++){
+      (mem_loc->players[i]).hand[0] = NONE;
+    }
     mem_loc->current_player = -1;
     //printf("starting value: %s\n", mem_loc);
     shmdt(mem_loc);
@@ -195,11 +199,12 @@ void subserver(int client_socket, int index) {
                     write(client_socket, buffer, BUFFER_SIZE);
 		    //printf("TEST");
 		    read(client_socket, buffer, BUFFER_SIZE);
-		    //printf("Received [%s] from client",buffer);
+		    printf("Received [%s] from client",buffer);
 		    process_action(client_socket,mem_loc,buffer,index);
-                    mem_loc->turn_completed = 1;
-                    mem_loc->received_update[index] = 1;
 		    //printf("my turn and received update");
+		    mem_loc->turn_completed = 1;
+		    mem_loc->received_update[index] = 1;
+
                 }
             }
 	    else {
@@ -304,10 +309,11 @@ void post_setup(int num_players) {
 void process_action(int client_socket, struct game_state *state, char * buffer, int playerindex){
 
   //printf("made it to processing");
-  char input = buffer[0];
+  int input = atoi(buffer);
   memset(buffer,0,BUFFER_SIZE);
   buffer[0] = 0;
   char output[BUFFER_SIZE];
+  memset(output,0,BUFFER_SIZE);
 
   //ENTER WILL REPRESENT DRAWING A CARD
   if(input == 0){    
@@ -315,6 +321,7 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     strcat(output,draw(state, playerindex));
     int j = 0;
     memset(state->testing,0,BUFFER_SIZE);
+
     strcat(output, " Your hand: ");
     for (j;j<20;j++){
       int card = (state->players[playerindex]).hand[j];
@@ -326,12 +333,74 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
       strcat(state->testing, temp);
     }
     strcat(output, state->testing);
+
     write(client_socket, output, BUFFER_SIZE);
+  }
+
+  else if(input == SKIP){
+    strcpy(output, "0 ");
+    strcat(output, "You skipped and ended your turn!\n");
+    
+    strcat(output, "  "); 
+    write(client_socket, output, BUFFER_SIZE);
+  }
+
+  else if(input == SEE_THE_FUTURE){
+    strcpy(output, "1 ");
+    strcat(output, "~The Future~: ");
+    
+    strcat(output, thefuture(state));
+    
+    strcat(output, "  ");
+    strcat(output, "\n");
+  
+    write(client_socket, output, BUFFER_SIZE);
+    read(client_socket, buffer, BUFFER_SIZE);
+    printf("Received [%s] from client",buffer);
+    process_action(client_socket,state,buffer,playerindex);
+
+  }
+
+  else if(input == SHUFFLE){
+    strcpy(output, "1 ");
+    strcat(output, "The deck's been shuffled!\n");
+    shuffle_deck(state);   
+    
+    strcat(output, "  ");
+    
+    write(client_socket, output, BUFFER_SIZE);
+    read(client_socket, buffer, BUFFER_SIZE);
+    printf("Received [%s] from client",buffer);
+    process_action(client_socket,state,buffer,playerindex);
+
+
   }
 
 
 
   //More inputs to be included here
+}
+
+char * thefuture(struct game_state * state){
+  int i = 0;
+  char * thefuture = malloc(100);
+
+  int end = 57;
+  for(i;i < 57; i++){
+    if((state->deck)[i] == 13){
+      end = i;
+      break;
+    }
+  }
+
+  for(i=end-1;i>end-4;i--){
+    int card = (state->deck)[i];
+    char temp[50];
+    sprintf(temp," %s, ",cardtotext(card));
+    strcat(thefuture, temp);
+  }
+
+  return thefuture;
 }
 
 char * draw(struct game_state *state, int playerindex){
@@ -361,7 +430,7 @@ char * draw(struct game_state *state, int playerindex){
   //Returns a string of what card the player drew
   char * outputstring = malloc(BUFFER_SIZE);
   char temp[BUFFER_SIZE];
-  sprintf(temp," You drew a [%s]!\n",cardtotext(drawncard));
+  sprintf(temp," You drew a %s!\n",cardtotext(drawncard));
   strcpy(outputstring, temp);
   return outputstring;
 
