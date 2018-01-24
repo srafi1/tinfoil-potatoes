@@ -62,3 +62,6 @@ clients now shown hands, except it needs to be simultaneous at start
 elsharawyM -- 2018-01-23 21:14
 each player's hand is now shown on every turn, even if not their own
 
+elsharawyM -- 2018-01-24 00:20
+tried to start a process function to start making user input meaningful
+

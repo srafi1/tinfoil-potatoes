@@ -47,6 +47,8 @@ void deal_deck(struct game_state*);
 void shuffle_deck(struct game_state*);
 void init_deck(struct game_state*);
 void insert_kitties(struct game_state*);
+void process_action(int client_socket, struct game_state *state, char * buffer, int playerindex);
+char * draw(struct game_state *state, int playerindex);
 
 
 int subserver_pids[MAX_PLAYERS];
@@ -157,6 +159,7 @@ void subserver(int client_socket, int index) {
     semop(sem_desc, &sb, 1);
 
     while (1) {
+      //printf("sub");
         sb.sem_op = -1;
         semop(sem_desc, &sb, 1);
 
@@ -169,23 +172,10 @@ void subserver(int client_socket, int index) {
                 for (i = 0; i < MAX_PLAYERS; i++) {
                     if (mem_loc->received_update[i] == 0 && i != index) {
                         all_received_update = 0;
-                        //printf("subserver #%d did not receive the update\n", i);
+                        printf("sub: subserver #%d did not receive the update\n", i);
                     }
                 }
-		/*
-		    i = 0;
-  j = 0;
-  for(i;i<6;i++){
-    if((state->players[i]).name[0]){
-      printf("[%s]'s hand: \n", (state->players[i]).name);
-      j = 0;
-      for(j;j<20;j++){
-	printf("[%d] ", (state->players[i]).hand[j]);
-      }
-      printf("\n");
-    }
-  }
-		*/
+
                 if (all_received_update) {
                     strcpy(buffer, "1 ");
 		    int j = 0;
@@ -202,10 +192,13 @@ void subserver(int client_socket, int index) {
 		    }
                     strcat(buffer, mem_loc->testing);
                     write(client_socket, buffer, BUFFER_SIZE);
-                    read(client_socket, buffer, BUFFER_SIZE);
-                    strncpy(mem_loc->testing, buffer, BUFFER_SIZE);
+		    printf("TEST");
+		    read(client_socket, buffer, BUFFER_SIZE);
+		    printf("Received [%s] from client",buffer);
+		    //process_action(client_socket,mem_loc,buffer,index);
                     mem_loc->turn_completed = 1;
                     mem_loc->received_update[index] = 1;
+		    printf("my turn and received update");
                 }
             }
 	    else {
@@ -225,6 +218,7 @@ void subserver(int client_socket, int index) {
 	      strcat(buffer, mem_loc->testing);
 	      write(client_socket, buffer, BUFFER_SIZE);
 	      mem_loc->received_update[index] = 1;
+	      printf("not my turn but received update");
             }
         }
 
@@ -278,8 +272,8 @@ void post_setup(int num_players) {
         int all_received_update = 1;
         for (i = 0; i < num_players; i++) {
             if (mem_loc->received_update[i] == 0) {
-                all_received_update = 0;
-                //printf("subserver #%d did not receive the update\n", i);
+	      all_received_update = 0;
+	      printf("post: subserver #%d did not receive the update\n", i);
             }
         }
 
@@ -304,6 +298,71 @@ void post_setup(int num_players) {
         sb.sem_op = 1;
         semop(sem_desc, &sb, 1);
     }
+}
+
+void process_action(int client_socket, struct game_state *state, char * buffer, int playerindex){
+
+  printf("made it to processing");
+  char input = buffer[0];
+  memset(buffer,0,BUFFER_SIZE);
+  buffer[0] = 0;
+  char output[BUFFER_SIZE];
+
+  //ENTER WILL REPRESENT DRAWING A CARD
+  if(input == 0){
+    strcat(output,draw(state, playerindex));
+    
+    strcpy(buffer, "1 ");
+    int j = 0;
+    memset(state->testing,0,BUFFER_SIZE);
+    strcat(buffer, " Your hand: ");
+    for (j;j<20;j++){
+      int card = (state->players[playerindex]).hand[j];
+      if(card == NONE){
+	break;
+      }
+      char temp[256];
+      sprintf(temp,"[%d] ", card);
+      strcat(state->testing, temp);
+    }
+    strcat(buffer, state->testing);
+    write(client_socket, buffer, BUFFER_SIZE);
+  }
+
+  //More inputs to be included here
+}
+
+char * draw(struct game_state *state, int playerindex){
+  //Removes card from end of deck
+  int i = 0;
+  int end = 57;
+  for(i;i < 57; i++){
+    if((state->deck)[i] == 13){
+      end = i;
+      break;
+    }
+  }
+  i--;
+  int drawncard = (state->deck)[i];
+  (state->deck)[i] = NONE;
+
+  //Adds drawncard to player's hand
+  i=0;
+  for(i;i<20;i++){
+    int card = (state->players[playerindex]).hand[i];
+    if(card == NONE){
+      break;
+    }
+    (state->players[playerindex]).hand[i] = drawncard;
+    (state->players[playerindex]).hand[i+1] = NONE;
+    
+  }
+  //Returns a string of what card the player drew
+  char outputstring[BUFFER_SIZE];
+  sprintf(outputstring," You drew a [%d]!\n",drawncard);
+  return outputstring;
+
+  
 }
 
 void init_deck(struct game_state *state){
