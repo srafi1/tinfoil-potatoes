@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
     //read update
     //printf("-1");
     read(server_socket, buffer, sizeof(buffer));
-    //printf("Received [%s] from server\n\n\n", buffer);
+    printf("Received [%s] from server\n\n\n", buffer);
     //printf("0");
     int turn;
     char data[256];

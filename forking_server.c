@@ -16,7 +16,7 @@
 
 union semun {
     int val;
-    struct semid_ds *buf;
+    struct semid_ds *bsuf;
     unsigned short *array;
     struct seminfo *__buf;
 };
@@ -24,6 +24,7 @@ union semun {
 struct player{
   char name[15];
   int hand[20];
+  int attacked;
 };
   
 struct game_state {
@@ -183,6 +184,11 @@ void subserver(int client_socket, int index) {
 
                 if (all_received_update) {
                     strcpy(buffer, "1 ");
+
+		    char tmp[100];
+		    sprintf(tmp, "attacked: %d\n",mem_loc->players[index].attacked);
+		    strcat(buffer, tmp);
+		    strcat(buffer, "initial ");
 		    int j = 0;
 		    memset(mem_loc->testing,0,BUFFER_SIZE);
 		    strcat(buffer, "Your hand: ");
@@ -209,6 +215,10 @@ void subserver(int client_socket, int index) {
             }
 	    else {
 	      strcpy(buffer, "0 ");
+	      char tmp[100];
+	      sprintf(tmp, "attacked: %d\n",mem_loc->players[index].attacked);
+	      strcat(buffer, tmp);
+	      strcat(buffer, "not your turn");
 	      int j = 0;
 	      memset(mem_loc->testing,0,BUFFER_SIZE);
 	      strcat(buffer, "Your hand: ");
@@ -316,8 +326,23 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
   memset(output,0,BUFFER_SIZE);
 
   //ENTER WILL REPRESENT DRAWING A CARD
-  if(input == 0){    
-    strcpy(output, "0 ");
+  if(input == 0){
+    if(state->players[playerindex].attacked){
+      strcpy(output, "1 ");
+      char tmp[100];
+      sprintf(tmp, "attacked: %d\n",state->players[playerindex].attacked);
+      strcat(buffer, tmp);
+      strcat(buffer, "draw ");
+      strcat(output, "You were attacked, so you must take two turns!\n");
+    }
+    else{
+      strcpy(output, "0 ");
+      strcat(buffer, "draw ");
+      char tmp[100];
+      sprintf(tmp, "attacked: %d\n",state->players[playerindex].attacked);
+      strcat(buffer, tmp);
+    }
+    
     strcat(output,draw(state, playerindex));
     int j = 0;
     memset(state->testing,0,BUFFER_SIZE);
@@ -335,14 +360,37 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     strcat(output, state->testing);
 
     write(client_socket, output, BUFFER_SIZE);
+
+    if(state->players[playerindex].attacked){
+      state->players[playerindex].attacked = 0;
+      printf("attacked: %d\n",state->players[playerindex].attacked);
+      read(client_socket, buffer, BUFFER_SIZE);    
+      process_action(client_socket,state,buffer,playerindex);
+    }
+    
+
   }
 
   else if(input == SKIP){
-    strcpy(output, "0 ");
+    if(state->players[playerindex].attacked){
+      strcpy(output, "1 ");
+    }
+    else{
+      strcpy(output, "0 ");
+    }
+    
     strcat(output, "You skipped and ended your turn!\n");
     
     strcat(output, "  "); 
     write(client_socket, output, BUFFER_SIZE);
+
+    if(state->players[playerindex].attacked){
+      state->players[playerindex].attacked = 0;
+      read(client_socket, buffer, BUFFER_SIZE);
+      process_action(client_socket,state,buffer,playerindex);
+    }
+    
+
   }
 
   else if(input == SEE_THE_FUTURE){
@@ -373,6 +421,26 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     printf("Received [%s] from client",buffer);
     process_action(client_socket,state,buffer,playerindex);
 
+
+  }
+
+  else if(input == ATTACK){
+    state->players[playerindex].attacked = 0;
+    strcpy(output, "0 ");
+
+    int attackedindex = playerindex + 1;
+    if(state->players[attackedindex].name[0] == 0){
+      attackedindex = 0;
+    }
+    state->players[attackedindex].attacked = 1;
+
+    char tmp[BUFFER_SIZE];
+    sprintf(tmp, "You attacked %s, forcing them to take two turns!\n", state->players[attackedindex].name);
+    strcat(output,tmp);
+    
+    strcat(output, "  ");
+    
+    write(client_socket, output, BUFFER_SIZE);
 
   }
 
