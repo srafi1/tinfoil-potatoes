@@ -64,12 +64,21 @@ int main(int argc, char **argv) {
     
 
     if (turn) {
-      printf("Your move: ");
-      fgets(buffer, sizeof(buffer), stdin);
-      *strchr(buffer, '\n') = 0;
-      int card = process_input(buffer,arr);
       char temp[5];
-      sprintf(temp,"%d",card);
+      if(turn == 1){
+	printf("Your move: ");
+	fgets(buffer, sizeof(buffer), stdin);
+	*strchr(buffer, '\n') = 0;
+	int card = process_input(buffer,arr);
+	sprintf(temp,"%d",card);
+      }
+      else{
+	printf("Pick a deck index: ");
+	fgets(buffer, sizeof(buffer), stdin);
+	*strchr(buffer, '\n') = 0;
+	int index = atoi(buffer);
+	sprintf(temp, "%d",index);
+      }
    
       write(server_socket, temp, sizeof(temp));
       //printf("Sent [%s] to server\n", temp);
