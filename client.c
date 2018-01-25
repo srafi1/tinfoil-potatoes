@@ -34,8 +34,10 @@ int main(int argc, char **argv) {
     int turn;
     char data[256];
     memset(data,0,256);
-    sscanf(buffer, "%d  %[^\t\n]s", &turn, data);
-    printf("%s\n", data);
+    sscanf(buffer, "%d", &turn);
+
+    strcpy(data, (buffer + 2));
+    printf("%s\n", data);    
 
     char * line2 = (char*)malloc(200);
     char * line3 = strcpy(line2, buffer);

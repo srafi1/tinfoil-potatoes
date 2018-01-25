@@ -15,10 +15,10 @@
 #define MAX_PLAYERS 6
 
 union semun {
-    int val;
-    struct semid_ds *bsuf;
-    unsigned short *array;
-    struct seminfo *__buf;
+  int val;
+  struct semid_ds *bsuf;
+  unsigned short *array;
+  struct seminfo *__buf;
 };
 
 struct player{
@@ -28,14 +28,14 @@ struct player{
 };
   
 struct game_state {
-    struct player players[6]; // TODO: ask user for better name if longer than 13 chars
-    int current_player;
-    int deck[57]; //52 normal cards + (playercount-1) EK
-    int discard[57];
-    int cards_left;
-    int turn_completed;
-    int received_update[6];
-    char testing[BUFFER_SIZE];
+  struct player players[6]; // TODO: ask user for better name if longer than 13 chars
+  int current_player;
+  int deck[57]; //52 normal cards + (playercount-1) EK
+  int discard[57];
+  int cards_left;
+  int turn_completed;
+  int received_update[6];
+  char testing[BUFFER_SIZE];
 };
 
 
@@ -57,263 +57,265 @@ char * thefuture();
 int subserver_pids[MAX_PLAYERS];
 
 int main() {
-    setup_shm();
-    signal(SIGINT, sighandler);
+  setup_shm();
+  signal(SIGINT, sighandler);
 
-    int listen_socket;
-    int f;
-    listen_socket = server_setup();
-    printf("%d\n",listen_socket);
+  int listen_socket;
+  int f;
+  listen_socket = server_setup();
+  printf("%d\n",listen_socket);
 
-    printf("Press [ENTER] when all players have connected\n");
-    if (fork() == 0) {
-      getchar();
-        //stop accepting connections from socket
-        shutdown(listen_socket, SHUT_RD);
-        return 0;
-    }
+  printf("Press [ENTER] when all players have connected\n");
+  if (fork() == 0) {
+    getchar();
+    //stop accepting connections from socket
+    shutdown(listen_socket, SHUT_RD);
+    return 0;
+  }
 
-    int current_player = 0;
-    int i;
-    for (i = 0; i < MAX_PLAYERS; i++) {
-        subserver_pids[i] = -1;
-    }
+  int current_player = 0;
+  int i;
+  for (i = 0; i < MAX_PLAYERS; i++) {
+    subserver_pids[i] = -1;
+  }
 
-    while (current_player < MAX_PLAYERS) {
+  while (current_player < MAX_PLAYERS) {
       
-	int client_socket = server_connect(listen_socket);
-        if (client_socket == -1) {
-            printf("Stopped accepting connections\n");
-            break;
-        }
-        f = fork();
-        if (f == 0) {
-            subserver(client_socket, current_player);
-        } else {
-            close(client_socket);
-            subserver_pids[current_player] = f;
-            current_player++;
-        }
+    int client_socket = server_connect(listen_socket);
+    if (client_socket == -1) {
+      printf("Stopped accepting connections\n");
+      break;
     }
+    f = fork();
+    if (f == 0) {
+      subserver(client_socket, current_player);
+    } else {
+      close(client_socket);
+      subserver_pids[current_player] = f;
+      current_player++;
+    }
+  }
 
-    post_setup(current_player);
+  post_setup(current_player);
 }
 
 void sighandler(int signum) {
-    int i;
-    for (i = 0; i < MAX_PLAYERS; i++) {
-        if (subserver_pids[i] > 0) {
-            printf("Killing subserver #%d with pid %d\n", i, subserver_pids[i]);
-            kill(subserver_pids[i], SIGINT);
-        }
+  int i;
+  for (i = 0; i < MAX_PLAYERS; i++) {
+    if (subserver_pids[i] > 0) {
+      printf("Killing subserver #%d with pid %d\n", i, subserver_pids[i]);
+      kill(subserver_pids[i], SIGINT);
     }
+  }
 
-    int sem_desc = semget(SEM_KEY, 1, 0);
-    semctl(sem_desc, 0, IPC_RMID);
+  int sem_desc = semget(SEM_KEY, 1, 0);
+  semctl(sem_desc, 0, IPC_RMID);
 
-    int mem_desc = shmget(SHM_KEY, sizeof(int), 0);
-    int shm_val = shmctl(mem_desc, IPC_RMID, 0);
-    exit(0);
+  int mem_desc = shmget(SHM_KEY, sizeof(int), 0);
+  int shm_val = shmctl(mem_desc, IPC_RMID, 0);
+  exit(0);
 }
 
 void setup_shm() {
-    int sem_desc = semget(SEM_KEY, 1, 0600 | IPC_CREAT | IPC_EXCL);
-    if (sem_desc < 0) {
-        printf("A server is already running\n");
-        exit(0);
-    }
-    union semun arg;
-    arg.val = 1;
-    semctl(sem_desc, 0, SETVAL, arg);
+  int sem_desc = semget(SEM_KEY, 1, 0600 | IPC_CREAT | IPC_EXCL);
+  if (sem_desc < 0) {
+    printf("A server is already running\n");
+    exit(0);
+  }
+  union semun arg;
+  arg.val = 1;
+  semctl(sem_desc, 0, SETVAL, arg);
 
-    int mem_desc = shmget(SHM_KEY, sizeof(struct game_state), 0600 | IPC_CREAT | IPC_EXCL);
-    struct game_state* mem_loc = (struct game_state*) shmat(mem_desc, 0, 0);
-    memset(mem_loc, 0, sizeof(struct game_state));
-    int i;
-    for (i = 0; i < 6; i++) {
-      (mem_loc->players[i]).name[0] = 0;
-    }
-    for(i=0; i<6; i++){
-      (mem_loc->players[i]).hand[0] = NONE;
-    }
-    mem_loc->current_player = -1;
-    //printf("starting value: %s\n", mem_loc);
-    shmdt(mem_loc);
+  int mem_desc = shmget(SHM_KEY, sizeof(struct game_state), 0600 | IPC_CREAT | IPC_EXCL);
+  struct game_state* mem_loc = (struct game_state*) shmat(mem_desc, 0, 0);
+  memset(mem_loc, 0, sizeof(struct game_state));
+  int i;
+  for (i = 0; i < 6; i++) {
+    (mem_loc->players[i]).name[0] = 0;
+  }
+  for(i=0; i<6; i++){
+    (mem_loc->players[i]).hand[0] = NONE;
+  }
+  mem_loc->current_player = -1;
+  //printf("starting value: %s\n", mem_loc);
+  shmdt(mem_loc);
 }
 
 void subserver(int client_socket, int index) {
-    printf("subserver created\n");
-    int sem_desc = semget(SEM_KEY, 1, 0);
-    int mem_desc = shmget(SHM_KEY, sizeof(struct game_state), 0);
-    struct game_state* mem_loc = (struct game_state*) shmat(mem_desc, 0, 0);
+  printf("subserver created\n");
+  int sem_desc = semget(SEM_KEY, 1, 0);
+  int mem_desc = shmget(SHM_KEY, sizeof(struct game_state), 0);
+  struct game_state* mem_loc = (struct game_state*) shmat(mem_desc, 0, 0);
 
-    char buffer[BUFFER_SIZE];
-    memset(buffer,0,BUFFER_SIZE);
+  char buffer[BUFFER_SIZE];
+  memset(buffer,0,BUFFER_SIZE);
 
-    struct sembuf sb;
+  struct sembuf sb;
+  sb.sem_op = -1;
+  sb.sem_flg = SEM_UNDO;
+  sb.sem_num = 0;
+  semop(sem_desc, &sb, 1);
+
+  read(client_socket, buffer, 15);
+  printf("[subserver %d] player name: %s\n", getpid(), buffer);
+  //copy char by char because assigning a pointer directly won't work with shm
+  strncpy((mem_loc->players[index]).name, buffer, 15);
+
+  sb.sem_op = 1;
+  semop(sem_desc, &sb, 1);
+
+  while (1) {
+    //printf("sub");
     sb.sem_op = -1;
-    sb.sem_flg = SEM_UNDO;
-    sb.sem_num = 0;
     semop(sem_desc, &sb, 1);
 
-    read(client_socket, buffer, 15);
-    printf("[subserver %d] player name: %s\n", getpid(), buffer);
-    //copy char by char because assigning a pointer directly won't work with shm
-    strncpy((mem_loc->players[index]).name, buffer, 15);
+    if (mem_loc->received_update[index] == 0) {
+      //send update to client, then take input if it's their turn
+      //0 means not their turn, 1 means their turn
+      if (mem_loc->current_player == index) {
+	int all_received_update = 1;
+	int i;
+	for (i = 0; i < MAX_PLAYERS; i++) {
+	  if (mem_loc->received_update[i] == 0 && i != index) {
+	    all_received_update = 0;
+	    //printf("sub: subserver #%d did not receive the update\n", i);
+	  }
+	}
+
+	if (all_received_update) {
+	  strcpy(buffer, "1 ");
+
+	  char tmp[100];
+	  //	  sprintf(tmp, "attacked: %d\n",mem_loc->players[index].attacked);
+	  //strcat(buffer, tmp);
+	  //strcat(buffer, "initial ");
+	  int j = 0;
+	  memset(mem_loc->testing,0,BUFFER_SIZE);
+	  strcat(buffer, "Your hand: ");
+	  for (j;j<20;j++){
+	    int card = (mem_loc->players[index]).hand[j];
+	    if(card == NONE){
+	      break;
+	    }
+	    char temp[256];
+	    memset(temp,0,256);
+	    sprintf(temp,"[%s] ", cardtotext(card));
+	    strcat(mem_loc->testing, temp);
+	  }
+	  strcat(buffer, mem_loc->testing);
+	  write(client_socket, buffer, BUFFER_SIZE);
+	  //printf("TEST");
+	  read(client_socket, buffer, BUFFER_SIZE);
+	  //printf("Received [%s] from client",buffer);
+	  process_action(client_socket,mem_loc,buffer,index);
+	  //printf("my turn and received update");
+	  mem_loc->turn_completed = 1;
+	  mem_loc->received_update[index] = 1;
+
+	}
+      }
+      else {
+	strcpy(buffer, "0 ");
+	char tmp[100];
+	//sprintf(tmp, "attacked: %d\n",mem_loc->players[index].attacked);
+	//strcat(buffer, tmp);
+	//strcat(buffer, "not your turn");
+	int j = 0;
+	memset(mem_loc->testing,0,BUFFER_SIZE);
+	strcat(buffer, "Your hand: ");
+	for (j;j<20;j++){
+	  int card = (mem_loc->players[index]).hand[j];
+	  if(card == NONE){
+	    break;
+	  }
+	  char temp[256];
+	  memset(temp,0,256);
+	  sprintf(temp,"[%s] ", cardtotext(card));
+	  strcat(mem_loc->testing, temp);
+	}
+	strcat(buffer, mem_loc->testing);
+	write(client_socket, buffer, BUFFER_SIZE);
+	mem_loc->received_update[index] = 1;
+	//printf("not my turn but received update");
+      }
+    }
 
     sb.sem_op = 1;
     semop(sem_desc, &sb, 1);
+  }
 
-    while (1) {
-      //printf("sub");
-        sb.sem_op = -1;
-        semop(sem_desc, &sb, 1);
-
-        if (mem_loc->received_update[index] == 0) {
-            //send update to client, then take input if it's their turn
-            //0 means not their turn, 1 means their turn
-            if (mem_loc->current_player == index) {
-                int all_received_update = 1;
-                int i;
-                for (i = 0; i < MAX_PLAYERS; i++) {
-                    if (mem_loc->received_update[i] == 0 && i != index) {
-                        all_received_update = 0;
-                        //printf("sub: subserver #%d did not receive the update\n", i);
-                    }
-                }
-
-                if (all_received_update) {
-                    strcpy(buffer, "1 ");
-
-		    char tmp[100];
-		    sprintf(tmp, "attacked: %d\n",mem_loc->players[index].attacked);
-		    strcat(buffer, tmp);
-		    strcat(buffer, "initial ");
-		    int j = 0;
-		    memset(mem_loc->testing,0,BUFFER_SIZE);
-		    strcat(buffer, "Your hand: ");
-		    for (j;j<20;j++){
-		      int card = (mem_loc->players[index]).hand[j];
-		      if(card == NONE){
-			break;
-		      }
-		      char temp[256];
-		      sprintf(temp,"[%s] ", cardtotext(card));
-		      strcat(mem_loc->testing, temp);
-		    }
-                    strcat(buffer, mem_loc->testing);
-                    write(client_socket, buffer, BUFFER_SIZE);
-		    //printf("TEST");
-		    read(client_socket, buffer, BUFFER_SIZE);
-		    printf("Received [%s] from client",buffer);
-		    process_action(client_socket,mem_loc,buffer,index);
-		    //printf("my turn and received update");
-		    mem_loc->turn_completed = 1;
-		    mem_loc->received_update[index] = 1;
-
-                }
-            }
-	    else {
-	      strcpy(buffer, "0 ");
-	      char tmp[100];
-	      sprintf(tmp, "attacked: %d\n",mem_loc->players[index].attacked);
-	      strcat(buffer, tmp);
-	      strcat(buffer, "not your turn");
-	      int j = 0;
-	      memset(mem_loc->testing,0,BUFFER_SIZE);
-	      strcat(buffer, "Your hand: ");
-	      for (j;j<20;j++){
-		int card = (mem_loc->players[index]).hand[j];
-		if(card == NONE){
-		  break;
-		}
-		char temp[256];
-		sprintf(temp,"[%s] ", cardtotext(card));
-		strcat(mem_loc->testing, temp);
-	      }
-	      strcat(buffer, mem_loc->testing);
-	      write(client_socket, buffer, BUFFER_SIZE);
-	      mem_loc->received_update[index] = 1;
-	      //printf("not my turn but received update");
-            }
-        }
-
-        sb.sem_op = 1;
-        semop(sem_desc, &sb, 1);
-    }
-
-    shmdt(mem_loc);
-    close(client_socket);
-    exit(0);
+  shmdt(mem_loc);
+  close(client_socket);
+  exit(0);
 }
 
 void post_setup(int num_players) {
-    int sem_desc = semget(SEM_KEY, 1, 0);
-    int mem_desc = shmget(SHM_KEY, sizeof(struct game_state), 0);
-    struct game_state* mem_loc = (struct game_state*) shmat(mem_desc, 0, 0);
+  int sem_desc = semget(SEM_KEY, 1, 0);
+  int mem_desc = shmget(SHM_KEY, sizeof(struct game_state), 0);
+  struct game_state* mem_loc = (struct game_state*) shmat(mem_desc, 0, 0);
 
-    struct sembuf sb;
+  struct sembuf sb;
+  sb.sem_op = -1;
+  sb.sem_flg = SEM_UNDO;
+  sb.sem_num = 0;
+  semop(sem_desc, &sb, 1);
+
+  printf("Players: \n");
+  for (int i = 0; i < num_players; i++) {
+    printf("%s\n", (mem_loc->players[i]).name);
+  }
+  mem_loc->testing[0] = 0;
+  int i;
+  for (i = 0; i < MAX_PLAYERS; i++) {
+    if (i < num_players) {
+      mem_loc->received_update[i] = 0;
+    } else {
+      mem_loc->received_update[i] = -1;
+    }
+  }
+
+  sb.sem_op = 1;
+  semop(sem_desc, &sb, 1);
+
+  init_deck(mem_loc);
+  shuffle_deck(mem_loc);
+  deal_deck(mem_loc);
+  insert_kitties(mem_loc);
+  shuffle_deck(mem_loc);
+
+  while (1) {
     sb.sem_op = -1;
-    sb.sem_flg = SEM_UNDO;
-    sb.sem_num = 0;
     semop(sem_desc, &sb, 1);
 
-    printf("Players: \n");
-    for (int i = 0; i < num_players; i++) {
-      printf("%s\n", (mem_loc->players[i]).name);
+    int all_received_update = 1;
+    for (i = 0; i < num_players; i++) {
+      if (mem_loc->received_update[i] == 0) {
+	all_received_update = 0;
+	//printf("post: subserver #%d did not receive the update\n", i);
+      }
     }
-    mem_loc->testing[0] = 0;
-    int i;
-    for (i = 0; i < MAX_PLAYERS; i++) {
-        if (i < num_players) {
-            mem_loc->received_update[i] = 0;
-        } else {
-            mem_loc->received_update[i] = -1;
-        }
+
+    if (all_received_update) {
+      mem_loc->current_player++;
+      if (mem_loc->current_player == num_players) {
+	mem_loc->current_player = 0;
+      }
+      //mem_loc->turn_completed = 0;
+      for (i = 0; i < num_players; i++) {
+	mem_loc->received_update[i] = 0;
+      }
+	    
+      for(i = 0; i < 57; i++){
+	printf("deck[%d]: %s\n",i,cardtotext((mem_loc->deck)[i]));
+      }
+      printf("Player #%d turn: %s\n", mem_loc->current_player, (mem_loc->players[mem_loc->current_player]).name);
+    } else {
+      //printf("waiting on someone to get update\n");
     }
 
     sb.sem_op = 1;
     semop(sem_desc, &sb, 1);
-
-    init_deck(mem_loc);
-    shuffle_deck(mem_loc);
-    deal_deck(mem_loc);
-    insert_kitties(mem_loc);
-    shuffle_deck(mem_loc);
-
-    while (1) {
-        sb.sem_op = -1;
-        semop(sem_desc, &sb, 1);
-
-        int all_received_update = 1;
-        for (i = 0; i < num_players; i++) {
-            if (mem_loc->received_update[i] == 0) {
-	      all_received_update = 0;
-	      //printf("post: subserver #%d did not receive the update\n", i);
-            }
-        }
-
-        if (all_received_update) {
-            mem_loc->current_player++;
-            if (mem_loc->current_player == num_players) {
-                mem_loc->current_player = 0;
-            }
-            //mem_loc->turn_completed = 0;
-            for (i = 0; i < num_players; i++) {
-                mem_loc->received_update[i] = 0;
-            }
-	    
-	    for(i = 0; i < 57; i++){
-	      printf("deck[%d]: %s\n",i,cardtotext((mem_loc->deck)[i]));
-	    }
-            printf("Player #%d turn: %s\n", mem_loc->current_player, (mem_loc->players[mem_loc->current_player]).name);
-        } else {
-            //printf("waiting on someone to get update\n");
-        }
-
-        sb.sem_op = 1;
-        semop(sem_desc, &sb, 1);
-    }
+  }
 }
 
 void process_action(int client_socket, struct game_state *state, char * buffer, int playerindex){
@@ -325,28 +327,41 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
   char output[BUFFER_SIZE];
   memset(output,0,BUFFER_SIZE);
 
+  int i = 0;
+  for(i; i<20; i++){
+    if(state->players[playerindex].hand[i] == input){
+      state->players[playerindex].hand[i] = NONE;
+      break;
+    }
+  }
+
+  for(i; i<20;i++){
+    if(state->players[playerindex].hand[i+1]){
+      state->players[playerindex].hand[i] = state->players[playerindex].hand[i+1];
+    }
+  }
+
   //ENTER WILL REPRESENT DRAWING A CARD
   if(input == 0){
     if(state->players[playerindex].attacked){
       strcpy(output, "1 ");
       char tmp[100];
-      sprintf(tmp, "attacked: %d\n",state->players[playerindex].attacked);
-      strcat(buffer, tmp);
-      strcat(buffer, "draw ");
+      //sprintf(tmp, "attacked: %d\n",state->players[playerindex].attacked);
+      //strcat(buffer, tmp);
+      //strcat(buffer, "draw ");
       strcat(output, "You were attacked, so you must take two turns!\n");
     }
     else{
       strcpy(output, "0 ");
-      strcat(buffer, "draw ");
-      char tmp[100];
-      sprintf(tmp, "attacked: %d\n",state->players[playerindex].attacked);
-      strcat(buffer, tmp);
+      //strcat(buffer, "draw ");
+      //char tmp[100];
+      //sprintf(tmp, "attacked: %d\n",state->players[playerindex].attacked);
+      //strcat(buffer, tmp);
     }
     
     strcat(output,draw(state, playerindex));
-    int j = 0;
-    memset(state->testing,0,BUFFER_SIZE);
 
+    int j = 0;
     strcat(output, " Your hand: ");
     for (j;j<20;j++){
       int card = (state->players[playerindex]).hand[j];
@@ -355,15 +370,14 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
       }
       char temp[256];
       sprintf(temp,"[%s] ", cardtotext(card));
-      strcat(state->testing, temp);
+      strcat(output, temp);
     }
-    strcat(output, state->testing);
 
     write(client_socket, output, BUFFER_SIZE);
 
     if(state->players[playerindex].attacked){
       state->players[playerindex].attacked = 0;
-      printf("attacked: %d\n",state->players[playerindex].attacked);
+      //printf("attacked: %d\n",state->players[playerindex].attacked);
       read(client_socket, buffer, BUFFER_SIZE);    
       process_action(client_socket,state,buffer,playerindex);
     }
@@ -381,7 +395,18 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     
     strcat(output, "You skipped and ended your turn!\n");
     
-    strcat(output, "  "); 
+    strcat(output, "  ");
+    strcat(output, " Your hand: ");
+    int j=0;
+    for (j;j<20;j++){
+      int card = (state->players[playerindex]).hand[j];
+      if(card == NONE){
+	break;
+      }
+      char temp[256];
+      sprintf(temp,"[%s] ", cardtotext(card));
+      strcat(output, temp);
+    }
     write(client_socket, output, BUFFER_SIZE);
 
     if(state->players[playerindex].attacked){
@@ -401,7 +426,17 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     
     strcat(output, "  ");
     strcat(output, "\n");
-  
+    strcat(output, " Your hand: ");
+    int j=0;
+    for (j;j<20;j++){
+      int card = (state->players[playerindex]).hand[j];
+      if(card == NONE){
+	break;
+      }
+      char temp[256];
+      sprintf(temp,"[%s] ", cardtotext(card));
+      strcat(output, temp);
+    }
     write(client_socket, output, BUFFER_SIZE);
     read(client_socket, buffer, BUFFER_SIZE);
     printf("Received [%s] from client",buffer);
@@ -415,7 +450,17 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     shuffle_deck(state);   
     
     strcat(output, "  ");
-    
+    strcat(output, " Your hand: ");
+    int j=0;
+    for (j;j<20;j++){
+      int card = (state->players[playerindex]).hand[j];
+      if(card == NONE){
+	break;
+      }
+      char temp[256];
+      sprintf(temp,"[%s] ", cardtotext(card));
+      strcat(output, temp);
+    }
     write(client_socket, output, BUFFER_SIZE);
     read(client_socket, buffer, BUFFER_SIZE);
     printf("Received [%s] from client",buffer);
@@ -439,11 +484,22 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     strcat(output,tmp);
     
     strcat(output, "  ");
-    
+    int j=0;
+    strcat(output, " Your hand: ");
+    for (j;j<20;j++){
+      int card = (state->players[playerindex]).hand[j];
+      if(card == NONE){
+	break;
+      }
+      char temp[256];
+      sprintf(temp,"[%s] ", cardtotext(card));
+      strcat(output, temp);
+    }
     write(client_socket, output, BUFFER_SIZE);
 
   }
 
+  
 
 
   //More inputs to be included here
@@ -699,11 +755,11 @@ void insert_kitties(struct game_state* state){
 
 
 void process(char * s) {
-    while (*s) {
-        if (*s >= 'a' && *s <= 'z')
-            *s = ((*s - 'a') + 13) % 26 + 'a';
-        else  if (*s >= 'A' && *s <= 'Z')
-            *s = ((*s - 'a') + 13) % 26 + 'a';
-        s++;
-    }
+  while (*s) {
+    if (*s >= 'a' && *s <= 'z')
+      *s = ((*s - 'a') + 13) % 26 + 'a';
+    else  if (*s >= 'A' && *s <= 'Z')
+      *s = ((*s - 'a') + 13) % 26 + 'a';
+    s++;
+  }
 }
