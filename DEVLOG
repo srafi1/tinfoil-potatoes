@@ -20,61 +20,61 @@ made sure all clients are up to date with the game state
 set up shared memory to synchronize game state between subservers
 set up taking input from clients to be sent to all servers
 
-elsharawyM -- 2018-01-09 10:54
+mansourE -- 2018-01-09 10:54
 fixed shmem error
 
-elsharawyM -- 2018-01-09 11:04
+mansourE -- 2018-01-09 11:04
 scanf fix
 
 henryZ -- 2018-01-09 11:10
 added character names to print statements
 
-elsharawyM -- 2018-01-10 10:49
+mansourE -- 2018-01-10 10:49
 formalized deck size and created card IDs
 
-elsharawyM -- 2018-01-10 21:43
+mansourE -- 2018-01-10 21:43
 started server deck initialization, gave clients a hand array (uninitialized), and card definitions
 
-elsharawyM -- 2018-01-10 23:07
+mansourE -- 2018-01-10 23:07
 created shuffle_deck
 
-elsharawyM -- 2018-01-11 19:54
+mansourE -- 2018-01-11 19:54
 removed defuse cards from base deck for each player
 
-elsharawyM -- 2018-01-17 19:30
+mansourE -- 2018-01-17 19:30
 set up player struct and successfully implemented it
 
-elsharawyM -- 2018-01-17 21:08
+mansourE -- 2018-01-17 21:08
 dealt out cards accordingly to players in game_state struct
 
-elsharawyM -- 2018-01-17 21:13
+mansourE -- 2018-01-17 21:13
 fixed reshuffling and redealing on each turn
 
-elsharawyM -- 2018-01-18 10:25
+mansourE -- 2018-01-18 10:25
 headers added to top of file
 
-elsharawyM -- 2018-01-18 10:37
+mansourE -- 2018-01-18 10:37
 inserted exploding kittens into deck, game has now been set up
 
-elsharawyM -- 2018-01-18 20:18
+mansourE -- 2018-01-18 20:18
 clients now shown hands, except it needs to be simultaneous at start
 
-elsharawyM -- 2018-01-23 21:14
+mansourE -- 2018-01-23 21:14
 each player's hand is now shown on every turn, even if not their own
 
-elsharawyM -- 2018-01-24 00:20
+mansourE -- 2018-01-24 00:20
 tried to start a process function to start making user input meaningful
 
-elsharawyM -- 2018-01-24 01:39
+mansourE -- 2018-01-24 01:39
 fixed the bug and now players can draw cards from the pile!
 
-elsharawyM -- 2018-01-24 02:07
+mansourE -- 2018-01-24 02:07
 added number to text conversion for user readability
 
-elsharawyM + zhengH -- 2018-01-24 16:22
+mansourE + henryZ -- 2018-01-24 16:22
 added see the future, skip, and shuffle card functionality
 
-elsharawyM + zhengH -- 2018-01-24 18:05
+mansourE + henryZ -- 2018-01-24 18:05
 added attack card functionality
 
 everyone -- 2018-01-24 20:25
@@ -92,6 +92,6 @@ fixed server bind error
 everyone -- 2018-01-24 23:48
 implemented exploding kittens
 
-elsharawyM + zhengH -- 2018-01-25 01:59
+mansourE + henryZ -- 2018-01-25 01:59
 implemented endgame and fixed notification bug
 
