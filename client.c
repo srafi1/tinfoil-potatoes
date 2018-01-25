@@ -113,7 +113,7 @@ int cardtoint(char * cardstring){
   else if(strcmp(cardstring,"SEE THE FUTURE]") == 0){
     return 6;
   }
-  else if(strcmp(cardstring,"NOPE]") == 0){
+  else if(strcmp(cardstring,"REVERSE]") == 0){
     return 7;
   }
   else if(strcmp(cardstring,"TACOCAT]") == 0){

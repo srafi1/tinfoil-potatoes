@@ -6,7 +6,7 @@
 #define FAVOR 4
 #define SHUFFLE 5
 #define SEE_THE_FUTURE 6 
-#define NOPE 7
+#define REVERSE 7
 #define TACOCAT 8
 #define WATERMELON_CAT 9
 #define POTATO_CAT 10

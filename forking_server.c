@@ -36,6 +36,7 @@ struct game_state {
   int turn_completed;
   int received_update[6];
   char testing[BUFFER_SIZE];
+  int reversed;
 };
 
 
@@ -137,6 +138,7 @@ void setup_shm() {
     (mem_loc->players[i]).hand[0] = NONE;
   }
   mem_loc->current_player = -1;
+  mem_loc->reversed = 1;
   //printf("starting value: %s\n", mem_loc);
   shmdt(mem_loc);
 }
@@ -301,9 +303,14 @@ void post_setup(int num_players) {
     }
 
     if (all_received_update) {
-      mem_loc->current_player++;
+      mem_loc->current_player+= mem_loc->reversed;
+      
       if (mem_loc->current_player == num_players) {
 	mem_loc->current_player = 0;
+      }
+
+      if(mem_loc->current_player == -1){
+	mem_loc->current_player = num_players - 1;
       }
       //mem_loc->turn_completed = 0;
       for (i = 0; i < num_players; i++) {
@@ -507,10 +514,22 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     state->players[playerindex].attacked = 0;
     strcpy(output, "0 ");
 
-    int attackedindex = playerindex + 1;
-    if(state->players[attackedindex].name[0] == 0){
+    int x = 0;
+    for(x;x<6;x++){
+      if(state->players[x].name[0] == 0){
+	break;
+      }
+    }
+    
+    int attackedindex = playerindex + state->reversed;
+    if(attackedindex == x){
       attackedindex = 0;
     }
+
+    if(attackedindex == -1){
+      attackedindex = x-1;
+    }
+    
     state->players[attackedindex].attacked = 1;
 
     char tmp[BUFFER_SIZE];
@@ -536,6 +555,47 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     sprintf(tzmp, "%s attacked %s!\n", state->players[playerindex].name, state->players[attackedindex].name);
     strcat(state->testing, tzmp);
     write(client_socket, output, BUFFER_SIZE);
+
+  }
+
+  else if(input == REVERSE){
+
+    if(state->players[playerindex].attacked){
+      strcpy(output, "1 ");
+    }
+    else{
+      strcpy(output, "0 ");
+    }
+    strcat(output, "You reversed the order of play!\n");
+
+    state->reversed *= -1;
+    
+    strcat(output, "  ");
+    strcat(output, " Your hand: ");
+    int j=0;
+    for (j;j<20;j++){
+      int card = (state->players[playerindex]).hand[j];
+      if(card == NONE){
+	break;
+      }
+      char temp[256];
+      sprintf(temp,"[%s] ", cardtotext(card));
+      strcat(output, temp);
+    }
+    strcat(output, "\n");
+
+    char tmp[256];
+    sprintf(tmp, "%s reversed the order of play!\n", state->players[playerindex].name);
+    strcat(state->testing, tmp);
+
+    write(client_socket, output, BUFFER_SIZE);
+    if(state->players[playerindex].attacked){
+      state->players[playerindex].attacked = 0;
+      read(client_socket, buffer, BUFFER_SIZE);
+      process_action(client_socket,state,buffer,playerindex,0);
+    }
+    printf("Received [%s] from client",buffer);
+
 
   }
 
@@ -627,7 +687,7 @@ char * cardtotext(int cardid){
     strcpy(result,"SEE THE FUTURE");
   }
   else if(cardid == 7){
-    strcpy(result,"NOPE");
+    strcpy(result,"REVERSE");
   }
   else if(cardid == 8){
     strcpy(result,"TACOCAT");
@@ -675,7 +735,7 @@ void init_deck(struct game_state *state){
       (state->deck)[i] = SEE_THE_FUTURE;
     }
     else if(i < 26){
-      (state->deck)[i] = NOPE;
+      (state->deck)[i] = REVERSE;
     }
     else if(i < 30){
       (state->deck)[i] = TACOCAT;
