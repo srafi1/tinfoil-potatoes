@@ -136,7 +136,7 @@ void setup_shm() {
   memset(mem_loc, 0, sizeof(struct game_state));
   int i;
   for (i = 0; i < 6; i++) {
-    (mem_loc->players[i]).name[0] = 0;
+    //(mem_loc->players[i]).name[0] = 0;
     mem_loc->players[i].alive = 1;
   }
   for(i=0; i<6; i++){
@@ -409,6 +409,9 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
   memset(output,0,BUFFER_SIZE);
   char message[BUFFER_SIZE];
   memset(message,0,BUFFER_SIZE);
+
+  
+  
   if(new){
     memset(state->testing,0,BUFFER_SIZE);
   }
@@ -460,9 +463,9 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     }
     strcat(output, "\n");
 
-    char tmp[256];
-    sprintf(tmp, "%s drew a card!\n", state->players[playerindex].name);
-    strcat(state->testing, tmp);
+    //char tmp[256];
+    //sprintf(tmp, "%s drew a card!\n", state->players[playerindex].name);
+    //strcat(state->testing, tmp);
     
     write(client_socket, output, BUFFER_SIZE);
 
@@ -592,6 +595,13 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     }
 
     int attackedindex = playerindex + state->reversed;
+    if(attackedindex == x){
+      attackedindex = 0;
+    }
+    else if(attackedindex == -1){
+      attackedindex = x-1;
+    }
+    
     while(state->players[attackedindex].alive == 0){
      
 
@@ -604,6 +614,9 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
       }
       
     }
+
+
+
     
     state->players[attackedindex].attacked = 1;
 
@@ -674,6 +687,39 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
 
   }
 
+  int x = 0;
+  for(x;x<6;x++){
+    if(state->players[x].name[0] == 0){
+      break;
+    }
+  }
+
+  int nextindex = playerindex + state->reversed;
+  if(nextindex == x){
+    nextindex = 0;
+  }
+  
+  else if(nextindex == -1){
+    nextindex = x-1;
+  }
+  printf("%d\n",x);
+  while(state->players[nextindex].alive == 0){
+      
+      
+    nextindex += state->reversed;
+    if(nextindex == x){
+      nextindex = 0;
+    }
+    else if(nextindex == -1){
+      nextindex = x-1;
+    }
+    
+  }
+
+  char timp[256];
+  sprintf(timp, "%s's turn...", state->players[nextindex].name);
+  strcat(state->testing,timp);
+  
   printf("processing: %s\n",state->testing);
   
 
@@ -722,7 +768,7 @@ char * draw(int client_socket, struct game_state *state, int playerindex){
   if(drawncard == EXPLODING_KITTEN){
     strcat(outputstring,"You drew an EXPLODING KITTEN!!!\n");
     int j = 0;
-    for(j;j<20;j++){
+    for(j;j<20 && (state->players[playerindex].hand[j] != NONE);j++){
       if(state->players[playerindex].hand[j] == DEFUSE && !defuse){
 	strcat(outputstring,"...but were saved by your DEFUSE card!\n");
 	char tamp[5];
@@ -740,6 +786,9 @@ char * draw(int client_socket, struct game_state *state, int playerindex){
     if(!defuse){
 	strcat(outputstring,"...and were blown to meowing smithereens!!!!\n");
 	strcat(outputstring,"******YOU DIED!******\n");
+	char tmp[256];
+	sprintf(tmp, "%s drew an EXPLODING KITTEN and  DIED!\n", state->players[playerindex].name);
+	strcat(state->testing, tmp);
 	
 	state->players[playerindex].alive = 0;
     }
@@ -781,11 +830,25 @@ char * draw(int client_socket, struct game_state *state, int playerindex){
     state->deck[kittyindex] = EXPLODING_KITTEN;
   }
 
-  if(!(drawncard == EXPLODING_KITTEN && defuse)){
+  if(drawncard != EXPLODING_KITTEN){
+    strcat(outputstring, temp);
+    char tmp[256];
+    sprintf(tmp, "%s drew a card!\n", state->players[playerindex].name);
+    strcat(state->testing, tmp);
+  }
+
+  else if(!defuse){
     strcat(outputstring, temp);
   }
+  
   else{
     strcpy(outputstring, "The kitten has been re-inserted...\n");
+    char tmp[256];
+    sprintf(tmp, "%s drew an EXPLODING KITTEN but had a DEFUSE card!\n", state->players[playerindex].name);
+    strcat(state->testing, tmp);
+    memset(tmp,0,256);
+    sprintf(tmp, "%s deliberately put the kitten somewhere in the deck...\n", state->players[playerindex].name);
+    strcat(state->testing, tmp);
   }
   return outputstring;
   
