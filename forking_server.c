@@ -48,7 +48,7 @@ void deal_deck(struct game_state*);
 void shuffle_deck(struct game_state*);
 void init_deck(struct game_state*);
 void insert_kitties(struct game_state*);
-void process_action(int client_socket, struct game_state *state, char * buffer, int playerindex);
+void process_action(int client_socket, struct game_state *state, char * buffer, int playerindex, int new);
 char * draw(struct game_state *state, int playerindex);
 char * cardtotext(int cardid);
 char * thefuture();
@@ -190,7 +190,7 @@ void subserver(int client_socket, int index) {
 	  //strcat(buffer, tmp);
 	  //strcat(buffer, "initial ");
 	  int j = 0;
-	  memset(mem_loc->testing,0,BUFFER_SIZE);
+	  //memset(mem_loc->testing,0,BUFFER_SIZE);
 	  strcat(buffer, "Your hand: ");
 	  for (j;j<20;j++){
 	    int card = (mem_loc->players[index]).hand[j];
@@ -200,14 +200,16 @@ void subserver(int client_socket, int index) {
 	    char temp[256];
 	    memset(temp,0,256);
 	    sprintf(temp,"[%s] ", cardtotext(card));
-	    strcat(mem_loc->testing, temp);
+	    strcat(buffer, temp);
 	  }
+	  printf("[%s]\n", mem_loc->testing);
+	  strcat(buffer, "\n");
 	  strcat(buffer, mem_loc->testing);
 	  write(client_socket, buffer, BUFFER_SIZE);
 	  //printf("TEST");
 	  read(client_socket, buffer, BUFFER_SIZE);
 	  //printf("Received [%s] from client",buffer);
-	  process_action(client_socket,mem_loc,buffer,index);
+	  process_action(client_socket,mem_loc,buffer,index,1);
 	  //printf("my turn and received update");
 	  mem_loc->turn_completed = 1;
 	  mem_loc->received_update[index] = 1;
@@ -221,7 +223,7 @@ void subserver(int client_socket, int index) {
 	//strcat(buffer, tmp);
 	//strcat(buffer, "not your turn");
 	int j = 0;
-	memset(mem_loc->testing,0,BUFFER_SIZE);
+	//memset(mem_loc->testing,0,BUFFER_SIZE);
 	strcat(buffer, "Your hand: ");
 	for (j;j<20;j++){
 	  int card = (mem_loc->players[index]).hand[j];
@@ -231,9 +233,12 @@ void subserver(int client_socket, int index) {
 	  char temp[256];
 	  memset(temp,0,256);
 	  sprintf(temp,"[%s] ", cardtotext(card));
-	  strcat(mem_loc->testing, temp);
+	  strcat(buffer, temp);
 	}
-	strcat(buffer, mem_loc->testing);
+	strcat(buffer, "\n");
+	
+	printf("[%s]\n", mem_loc->testing);
+	//strcat(buffer,mem_loc->testing);
 	write(client_socket, buffer, BUFFER_SIZE);
 	mem_loc->received_update[index] = 1;
 	//printf("not my turn but received update");
@@ -312,21 +317,25 @@ void post_setup(int num_players) {
     } else {
       //printf("waiting on someone to get update\n");
     }
-
     sb.sem_op = 1;
     semop(sem_desc, &sb, 1);
   }
 }
 
-void process_action(int client_socket, struct game_state *state, char * buffer, int playerindex){
+void process_action(int client_socket, struct game_state *state, char * buffer, int playerindex, int new){
 
   //printf("made it to processing");
   int input = atoi(buffer);
-  memset(buffer,0,BUFFER_SIZE);
+  //memset(buffer,0,BUFFER_SIZE);
   buffer[0] = 0;
   char output[BUFFER_SIZE];
   memset(output,0,BUFFER_SIZE);
-
+  char message[BUFFER_SIZE];
+  memset(message,0,BUFFER_SIZE);
+  if(new){
+    memset(state->testing,0,BUFFER_SIZE);
+  }
+  
   int i = 0;
   for(i; i<20; i++){
     if(state->players[playerindex].hand[i] == input){
@@ -372,14 +381,19 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
       sprintf(temp,"[%s] ", cardtotext(card));
       strcat(output, temp);
     }
+    strcat(output, "\n");
 
+    char tmp[256];
+    sprintf(tmp, "%s drew a card!\n", state->players[playerindex].name);
+    strcat(state->testing, tmp);
+    
     write(client_socket, output, BUFFER_SIZE);
 
     if(state->players[playerindex].attacked){
       state->players[playerindex].attacked = 0;
       //printf("attacked: %d\n",state->players[playerindex].attacked);
       read(client_socket, buffer, BUFFER_SIZE);    
-      process_action(client_socket,state,buffer,playerindex);
+      process_action(client_socket,state,buffer,playerindex,0);
     }
     
 
@@ -407,12 +421,18 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
       sprintf(temp,"[%s] ", cardtotext(card));
       strcat(output, temp);
     }
+
+    strcat(output, "\n");
+
+    char tmp[256];
+    sprintf(tmp, "%s skipped their turn!\n", state->players[playerindex].name);
+    strcat(state->testing, tmp);
     write(client_socket, output, BUFFER_SIZE);
 
     if(state->players[playerindex].attacked){
       state->players[playerindex].attacked = 0;
       read(client_socket, buffer, BUFFER_SIZE);
-      process_action(client_socket,state,buffer,playerindex);
+      process_action(client_socket,state,buffer,playerindex,0);
     }
     
 
@@ -437,10 +457,18 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
       sprintf(temp,"[%s] ", cardtotext(card));
       strcat(output, temp);
     }
+    
+    strcat(output, "\n");
+
+    
+    char tmp[256];
+    sprintf(tmp, "%s saw the future!\n", state->players[playerindex].name);
+    strcat(state->testing, tmp);
+
     write(client_socket, output, BUFFER_SIZE);
     read(client_socket, buffer, BUFFER_SIZE);
     printf("Received [%s] from client",buffer);
-    process_action(client_socket,state,buffer,playerindex);
+    process_action(client_socket,state,buffer,playerindex,0);
 
   }
 
@@ -461,10 +489,16 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
       sprintf(temp,"[%s] ", cardtotext(card));
       strcat(output, temp);
     }
+    strcat(output, "\n");
+
+    char tmp[256];
+    sprintf(tmp, "%s shuffled the deck!\n", state->players[playerindex].name);
+    strcat(state->testing, tmp);
+
     write(client_socket, output, BUFFER_SIZE);
     read(client_socket, buffer, BUFFER_SIZE);
     printf("Received [%s] from client",buffer);
-    process_action(client_socket,state,buffer,playerindex);
+    process_action(client_socket,state,buffer,playerindex,0);
 
 
   }
@@ -495,10 +529,17 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
       sprintf(temp,"[%s] ", cardtotext(card));
       strcat(output, temp);
     }
+
+    strcat(output, "\n");
+
+    char tzmp[256];
+    sprintf(tzmp, "%s attacked %s!\n", state->players[playerindex].name, state->players[attackedindex].name);
+    strcat(state->testing, tzmp);
     write(client_socket, output, BUFFER_SIZE);
 
   }
 
+  printf("processing: %s\n",state->testing);
   
 
 
