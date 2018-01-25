@@ -63,12 +63,25 @@ int main(int argc, char **argv) {
     
 
     if (turn) {
-      char temp[5];
+      char temp[BUFFER_SIZE];
+      memset(temp,0,BUFFER_SIZE);
       if(turn == 1){
-	printf("Your move: ");
-	fgets(buffer, sizeof(buffer), stdin);
-	*strchr(buffer, '\n') = 0;
-	int card = process_input(buffer,arr);
+	int card = 0;
+	while(!card){
+	  printf("Your move: ");
+	  fgets(buffer, sizeof(buffer), stdin);
+	  if(!(buffer[0] == '\n')){
+	    *strchr(buffer, '\n') = 0;
+	    card = process_input(buffer,arr);
+	  }
+
+	  else{
+	    *strchr(buffer, '\n') = 0;
+	    break;
+	  }
+
+	}
+	
 	sprintf(temp,"%d",card);
       }
       else if(turn == 2){
@@ -90,9 +103,15 @@ int main(int argc, char **argv) {
 
 int process_input(char * buffer, char ** arr){
   int index = atoi(buffer);
+  int card = 0;
   //printf("index: %d",index);
-  int card = cardtoint(arr[index]);
+  if(index < 29 && arr[index]){
+    card = cardtoint(arr[index]);
+  }
   //printf("card at index: %d",card);
+  if(!card){
+    printf("Invalid input. Please try again!\n");
+  }
   return card;
 }
 

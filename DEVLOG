@@ -101,3 +101,6 @@ improved status messages
 elsharawyM+zhengH -- 2018-01-25 12:09
 fixed reverse update bug and extraneous space
 
+henryZ -- 2018-01-25 13:03
+added/changed HAND_SIZE to 27
+

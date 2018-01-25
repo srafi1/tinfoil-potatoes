@@ -13,6 +13,7 @@
 #define SEM_KEY 1492
 #define SHM_KEY 1776
 #define MAX_PLAYERS 6
+#define HAND_SIZE 27
 
 union semun {
   int val;
@@ -23,7 +24,7 @@ union semun {
 
 struct player{
   char name[50];
-  int hand[20];
+  int hand[HAND_SIZE];
   int attacked;
   int alive;
 };
@@ -200,7 +201,7 @@ void subserver(int client_socket, int index) {
 	  int j = 0;
 	  //memset(mem_loc->testing,0,BUFFER_SIZE);
 	  strcat(buffer, "Your hand: ");
-	  for (j;j<20;j++){
+	  for (j;j<HAND_SIZE;j++){
 	    int card = (mem_loc->players[index]).hand[j];
 	    if(card == NONE){
 	      break;
@@ -259,7 +260,7 @@ void subserver(int client_socket, int index) {
 	/*	int j = 0;
 	//memset(mem_loc->testing,0,BUFFER_SIZE);
 	strcat(buffer, "Your hand: ");
-	for (j;j<20;j++){
+	for (j;j<HAND_SIZE;j++){
 	int card = (mem_loc->players[index]).hand[j];
 	if(card == NONE){
 	break;
@@ -447,14 +448,14 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
   }
   
   int i = 0;
-  for(i; i<20; i++){
+  for(i; i<HAND_SIZE; i++){
     if(state->players[playerindex].hand[i] == input){
       state->players[playerindex].hand[i] = NONE;
       break;
     }
   }
 
-  for(i; i<20;i++){
+  for(i; i<HAND_SIZE;i++){
     if(state->players[playerindex].hand[i+1]){
       state->players[playerindex].hand[i] = state->players[playerindex].hand[i+1];
     }
@@ -482,7 +483,7 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
 
     int j = 0;
     strcat(output, " Your hand: ");
-    for (j;j<20;j++){
+    for (j;j<HAND_SIZE;j++){
       int card = (state->players[playerindex]).hand[j];
       if(card == NONE){
 	break;
@@ -527,7 +528,7 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     strcat(output, "  ");
     strcat(output, " Your hand: ");
     int j=0;
-    for (j;j<20;j++){
+    for (j;j<HAND_SIZE;j++){
       int card = (state->players[playerindex]).hand[j];
       if(card == NONE){
 	break;
@@ -568,7 +569,7 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     strcat(output, "\n");
     strcat(output, " Your hand: ");
     int j=0;
-    for (j;j<20;j++){
+    for (j;j<HAND_SIZE;j++){
       int card = (state->players[playerindex]).hand[j];
       if(card == NONE){
 	break;
@@ -600,7 +601,7 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     strcat(output, "  ");
     strcat(output, " Your hand: ");
     int j=0;
-    for (j;j<20;j++){
+    for (j;j<HAND_SIZE;j++){
       int card = (state->players[playerindex]).hand[j];
       if(card == NONE){
 	break;
@@ -667,7 +668,7 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     strcat(output, "  ");
     int j=0;
     strcat(output, " Your hand: ");
-    for (j;j<20;j++){
+    for (j;j<HAND_SIZE;j++){
       int card = (state->players[playerindex]).hand[j];
       if(card == NONE){
 	break;
@@ -706,7 +707,7 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     strcat(output, "  ");
     strcat(output, " Your hand: ");
     int j=0;
-    for (j;j<20;j++){
+    for (j;j<HAND_SIZE;j++){
       int card = (state->players[playerindex]).hand[j];
       if(card == NONE){
 	break;
@@ -811,7 +812,7 @@ char * draw(int client_socket, struct game_state *state, int playerindex){
   if(drawncard == EXPLODING_KITTEN){
     strcat(outputstring,"You drew an EXPLODING KITTEN!!!\n");
     int j = 0;
-    for(j;j<20 && (state->players[playerindex].hand[j] != NONE);j++){
+    for(j;j<HAND_SIZE && (state->players[playerindex].hand[j] != NONE);j++){
       if(state->players[playerindex].hand[j] == DEFUSE && !defuse){
 	strcat(outputstring,"...but were saved by your DEFUSE card!\n");
 	char tamp[5];
@@ -841,7 +842,7 @@ char * draw(int client_socket, struct game_state *state, int playerindex){
   if(drawncard != EXPLODING_KITTEN){
     //Adds drawncard to player's hand
     i=0;
-    for(i;i<20;i++){
+    for(i;i<HAND_SIZE;i++){
       int card = (state->players[playerindex]).hand[i];
       if(card == NONE){
 	break;
@@ -1053,7 +1054,7 @@ void deal_deck(struct game_state *state){
     if((state->players[i]).name[0]){
       printf("[%s]'s hand: \n", (state->players[i]).name);
       j = 0;
-      for(j;j<20;j++){
+      for(j;j<HAND_SIZE;j++){
 	printf("[%d] ", (state->players[i]).hand[j]);
       }
       printf("\n");
