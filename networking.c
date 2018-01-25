@@ -20,7 +20,9 @@ int server_setup() {
   int sd, i;
 
   //create the socket
+  int option = 1;
   sd = socket( AF_INET, SOCK_STREAM, 0 );
+  setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
   error_check( sd, "server socket" );
   printf("[server] socket created\n");
 
