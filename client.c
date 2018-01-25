@@ -25,10 +25,9 @@ int main(int argc, char **argv) {
 
   //printf("-2");
 
-  while (1) {
+  while (read(server_socket, buffer, sizeof(buffer))) {
     //read update
     //printf("-1");
-    read(server_socket, buffer, sizeof(buffer));
     //printf("Received [%s] from server\n\n\n", buffer);
     //printf("0");
     int turn;
