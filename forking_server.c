@@ -22,14 +22,14 @@ union semun {
 };
 
 struct player{
-  char name[15];
+  char name[50];
   int hand[20];
   int attacked;
   int alive;
 };
   
 struct game_state {
-  struct player players[6]; // TODO: ask user for better name if longer than 13 chars
+  struct player players[6];
   int current_player;
   int deck[57]; //52 normal cards + (playercount-1) EK
   int discard[57];
@@ -38,6 +38,7 @@ struct game_state {
   int received_update[6];
   char testing[BUFFER_SIZE];
   int reversed;
+  int ended;
 };
 
 
@@ -106,7 +107,9 @@ void sighandler(int signum) {
   for (i = 0; i < MAX_PLAYERS; i++) {
     if (subserver_pids[i] > 0) {
       printf("Killing subserver #%d with pid %d\n", i, subserver_pids[i]);
-      kill(subserver_pids[i], SIGINT);
+      if(signum == SIGINT){
+	kill(subserver_pids[i], SIGINT);
+      }
     }
   }
 
@@ -141,6 +144,7 @@ void setup_shm() {
   }
   mem_loc->current_player = -1;
   mem_loc->reversed = 1;
+  mem_loc->ended = 0;
   //printf("starting value: %s\n", mem_loc);
   shmdt(mem_loc);
 }
@@ -160,10 +164,10 @@ void subserver(int client_socket, int index) {
   sb.sem_num = 0;
   semop(sem_desc, &sb, 1);
 
-  read(client_socket, buffer, 15);
+  read(client_socket, buffer, 50);
   printf("[subserver %d] player name: %s\n", getpid(), buffer);
   //copy char by char because assigning a pointer directly won't work with shm
-  strncpy((mem_loc->players[index]).name, buffer, 15);
+  strncpy((mem_loc->players[index]).name, buffer, 50);
 
   sb.sem_op = 1;
   semop(sem_desc, &sb, 1);
@@ -208,8 +212,32 @@ void subserver(int client_socket, int index) {
 	  }
 	  printf("[%s]\n", mem_loc->testing);
 	  strcat(buffer, "\n");
-	  strcat(buffer, mem_loc->testing);
-	  if(mem_loc->players[index].alive){
+	  if(index != mem_loc->current_player - mem_loc->reversed){
+	    strcat(buffer, mem_loc->testing);
+	  }
+	  printf("ended: %d\n",mem_loc->ended);
+	  if(mem_loc->ended){
+	    memset(buffer,0,BUFFER_SIZE);
+	    strcat(buffer,"9 ");
+	    if(mem_loc->players[index].alive){
+	      strcat(buffer,"YOU WON, CONGRATULATIONS!!! :) \n");
+	    }
+	    else{
+	      int i = 0;
+	      for(i;i<6;i++){
+		if(mem_loc->players[i].alive){
+		  char tomp[70];
+		  sprintf(tomp,"%s has won, and you lost :( \n",mem_loc->players[i].name);
+		  strcat(buffer, tomp);
+		  break;
+		}
+	      }
+	    }
+	    write(client_socket, buffer, BUFFER_SIZE);
+	    mem_loc->received_update[index] = 1;
+	    exit(0);
+	  }
+	  else if(mem_loc->players[index].alive){
 	    write(client_socket, buffer, BUFFER_SIZE);
 	    //printf("TEST");
 	    read(client_socket, buffer, BUFFER_SIZE);
@@ -228,7 +256,7 @@ void subserver(int client_socket, int index) {
 	//sprintf(tmp, "attacked: %d\n",mem_loc->players[index].attacked);
 	//strcat(buffer, tmp);
 	//strcat(buffer, "not your turn");
-	int j = 0;
+	/*	int j = 0;
 	//memset(mem_loc->testing,0,BUFFER_SIZE);
 	strcat(buffer, "Your hand: ");
 	for (j;j<20;j++){
@@ -241,10 +269,36 @@ void subserver(int client_socket, int index) {
 	  sprintf(temp,"[%s] ", cardtotext(card));
 	  strcat(buffer, temp);
 	}
-	strcat(buffer, "\n");
+	strcat(buffer, "\n");*/
 	
 	printf("[%s]\n", mem_loc->testing);
-	//strcat(buffer,mem_loc->testing);
+	if(index != mem_loc->current_player - mem_loc->reversed){
+	  strcat(buffer, mem_loc->testing);
+	}
+	printf("ended: %d\n",mem_loc->ended);
+	if(mem_loc->ended){
+	  memset(buffer,0,BUFFER_SIZE);
+	  strcat(buffer,"9 ");
+	  if(mem_loc->players[index].alive){
+	    strcat(buffer,"YOU WON, CONGRATULATIONS!!! :) \n");
+	  }
+	  else{
+	    int i = 0;
+	    for(i;i<6;i++){
+	      if(mem_loc->players[i].alive){
+		char tomp[70];
+		sprintf(tomp,"%s has won, and you lost :( \n",mem_loc->players[i].name);
+		strcat(buffer, tomp);
+		break;
+	      }
+	    }
+	  }
+
+	  write(client_socket, buffer, BUFFER_SIZE);
+	  mem_loc->received_update[index] = 1;
+	  exit(0);
+	}
+
 	write(client_socket, buffer, BUFFER_SIZE);
 	mem_loc->received_update[index] = 1;
 	//printf("not my turn but received update");
@@ -317,14 +371,26 @@ void post_setup(int num_players) {
 	mem_loc->current_player = num_players - 1;
       }
       //mem_loc->turn_completed = 0;
+      int count = 0;
       for (i = 0; i < num_players; i++) {
 	mem_loc->received_update[i] = 0;
+	if(mem_loc->players[i].alive){
+	  count++;
+	}
       }
 	    
       for(i = 0; i < 57; i++){
 	printf("deck[%d]: %s\n",i,cardtotext((mem_loc->deck)[i]));
       }
+      printf("players alive: %d\n", count);
+      if(count==1){
+	printf("%s has won the game! :D\n", mem_loc->players[mem_loc->current_player].name);
+	mem_loc->ended = 1;
+	sleep(1);
+	sighandler(SIGTERM);
+      }
       printf("Player #%d turn: %s\n", mem_loc->current_player, (mem_loc->players[mem_loc->current_player]).name);
+      
     } else {
       //printf("waiting on someone to get update\n");
     }
@@ -659,7 +725,11 @@ char * draw(int client_socket, struct game_state *state, int playerindex){
     for(j;j<20;j++){
       if(state->players[playerindex].hand[j] == DEFUSE && !defuse){
 	strcat(outputstring,"...but were saved by your DEFUSE card!\n");
+	char tamp[5];
+	sprintf(tamp,"You may reinsert the kitten anywhere from indices 0-%d (%d being the top card).\n",end-1,end-1);
+	strcat(outputstring,tamp);
 	defuse = 1;
+	
       }
       
       if(defuse && state->players[playerindex].hand[j+1]){
@@ -669,6 +739,8 @@ char * draw(int client_socket, struct game_state *state, int playerindex){
 
     if(!defuse){
 	strcat(outputstring,"...and were blown to meowing smithereens!!!!\n");
+	strcat(outputstring,"******YOU DIED!******\n");
+	
 	state->players[playerindex].alive = 0;
     }
   }

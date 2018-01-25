@@ -18,9 +18,9 @@ int main(int argc, char **argv) {
 
   //send player name to server
   printf("Enter your name: ");
-  fgets(buffer, 15, stdin);
+  fgets(buffer, 50, stdin);
   *strchr(buffer, '\n') = 0;
-  write(server_socket, buffer, 15);
+  write(server_socket, buffer, 50);
   printf("Waiting for game to start...\n");
 
   //printf("-2");
@@ -71,12 +71,15 @@ int main(int argc, char **argv) {
 	int card = process_input(buffer,arr);
 	sprintf(temp,"%d",card);
       }
-      else{
+      else if(turn == 2){
 	printf("Pick a deck index: ");
 	fgets(buffer, sizeof(buffer), stdin);
 	*strchr(buffer, '\n') = 0;
 	int index = atoi(buffer);
 	sprintf(temp, "%d",index);
+      }
+      else if(turn == 9){
+	exit(0);
       }
    
       write(server_socket, temp, sizeof(temp));
