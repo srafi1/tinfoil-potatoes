@@ -260,14 +260,14 @@ void subserver(int client_socket, int index) {
 	//memset(mem_loc->testing,0,BUFFER_SIZE);
 	strcat(buffer, "Your hand: ");
 	for (j;j<20;j++){
-	  int card = (mem_loc->players[index]).hand[j];
-	  if(card == NONE){
-	    break;
-	  }
-	  char temp[256];
-	  memset(temp,0,256);
-	  sprintf(temp,"[%s] ", cardtotext(card));
-	  strcat(buffer, temp);
+	int card = (mem_loc->players[index]).hand[j];
+	if(card == NONE){
+	break;
+	}
+	char temp[256];
+	memset(temp,0,256);
+	sprintf(temp,"[%s] ", cardtotext(card));
+	strcat(buffer, temp);
 	}
 	strcat(buffer, "\n");*/
 	
@@ -409,6 +409,36 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
   memset(output,0,BUFFER_SIZE);
   char message[BUFFER_SIZE];
   memset(message,0,BUFFER_SIZE);
+  
+  int x = 0;
+  for(x;x<6;x++){
+    if(state->players[x].name[0] == 0){
+      break;
+    }
+  }
+
+  int nextindex = playerindex + state->reversed;
+
+  if(nextindex == x){
+    nextindex = 0;
+  }
+  
+  else if(nextindex == -1){
+    nextindex = x-1;
+  }
+  
+  while(state->players[nextindex].alive == 0){
+      
+      
+    nextindex += state->reversed;
+    if(nextindex == x){
+      nextindex = 0;
+    }
+    else if(nextindex == -1){
+      nextindex = x-1;
+    }
+    
+  }
 
   
   
@@ -475,6 +505,11 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
       read(client_socket, buffer, BUFFER_SIZE);    
       process_action(client_socket,state,buffer,playerindex,0);
     }
+    else{
+      char timp[256];
+      sprintf(timp, "%s's turn...", state->players[nextindex].name);
+      strcat(state->testing,timp);
+    }
     
 
   }
@@ -513,6 +548,11 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
       state->players[playerindex].attacked = 0;
       read(client_socket, buffer, BUFFER_SIZE);
       process_action(client_socket,state,buffer,playerindex,0);
+    }
+    else{
+      char timp[256];
+      sprintf(timp, "%s's turn...", state->players[nextindex].name);
+      strcat(state->testing,timp);
     }
     
 
@@ -642,8 +682,13 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     char tzmp[256];
     sprintf(tzmp, "%s attacked %s!\n", state->players[playerindex].name, state->players[attackedindex].name);
     strcat(state->testing, tzmp);
+    char timp[256];
+    sprintf(timp, "%s's turn...", state->players[nextindex].name);
+    strcat(state->testing,timp);
+  
     write(client_socket, output, BUFFER_SIZE);
 
+    
   }
 
   else if(input == REVERSE){
@@ -682,44 +727,42 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
       read(client_socket, buffer, BUFFER_SIZE);
       process_action(client_socket,state,buffer,playerindex,0);
     }
+    
+    else{
+      nextindex = playerindex + state->reversed;
+
+      if(nextindex == x){
+	nextindex = 0;
+      }
+  
+      else if(nextindex == -1){
+	nextindex = x-1;
+      }
+  
+      while(state->players[nextindex].alive == 0){
+      
+      
+	nextindex += state->reversed;
+	if(nextindex == x){
+	  nextindex = 0;
+	}
+	else if(nextindex == -1){
+	  nextindex = x-1;
+	}
+    
+      }
+
+      char timp[256];
+      sprintf(timp, "%s's turn...", state->players[nextindex].name);
+      strcat(state->testing,timp);
+    }
     printf("Received [%s] from client",buffer);
 
 
   }
 
-  int x = 0;
-  for(x;x<6;x++){
-    if(state->players[x].name[0] == 0){
-      break;
-    }
-  }
 
-  int nextindex = playerindex + state->reversed;
-  if(nextindex == x){
-    nextindex = 0;
-  }
-  
-  else if(nextindex == -1){
-    nextindex = x-1;
-  }
-  printf("%d\n",x);
-  while(state->players[nextindex].alive == 0){
-      
-      
-    nextindex += state->reversed;
-    if(nextindex == x){
-      nextindex = 0;
-    }
-    else if(nextindex == -1){
-      nextindex = x-1;
-    }
-    
-  }
 
-  char timp[256];
-  sprintf(timp, "%s's turn...", state->players[nextindex].name);
-  strcat(state->testing,timp);
-  
   printf("processing: %s\n",state->testing);
   
 
@@ -784,13 +827,13 @@ char * draw(int client_socket, struct game_state *state, int playerindex){
     }
 
     if(!defuse){
-	strcat(outputstring,"...and were blown to meowing smithereens!!!!\n");
-	strcat(outputstring,"******YOU DIED!******\n");
-	char tmp[256];
-	sprintf(tmp, "%s drew an EXPLODING KITTEN and  DIED!\n", state->players[playerindex].name);
-	strcat(state->testing, tmp);
+      strcat(outputstring,"...and were blown to meowing smithereens!!!!\n");
+      strcat(outputstring,"******YOU DIED!******\n");
+      char tmp[256];
+      sprintf(tmp, "%s drew an EXPLODING KITTEN and DIED!\n", state->players[playerindex].name);
+      strcat(state->testing, tmp);
 	
-	state->players[playerindex].alive = 0;
+      state->players[playerindex].alive = 0;
     }
   }
 
