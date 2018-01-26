@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
   while (read(server_socket, buffer, sizeof(buffer))) {
     //read update
     //printf("-1");
-    //printf("Received [%s] from server\n\n\n", buffer);
+    printf("Received [%s] from server\n\n\n", buffer);
     //printf("0");
     int turn;
     char data[256];
@@ -65,6 +65,7 @@ int main(int argc, char **argv) {
     if (turn) {
       char temp[BUFFER_SIZE];
       memset(temp,0,BUFFER_SIZE);
+      memset(buffer,0,BUFFER_SIZE);
       if(turn == 1){
 	int card = 0;
 	while(!card){
@@ -77,6 +78,7 @@ int main(int argc, char **argv) {
 
 	  else{
 	    *strchr(buffer, '\n') = 0;
+	    card = 99;
 	    break;
 	  }
 
@@ -91,12 +93,30 @@ int main(int argc, char **argv) {
 	int index = atoi(buffer);
 	sprintf(temp, "%d",index);
       }
+      else if(turn == 3){
+	printf("Pick a player: ");
+	fgets(buffer, sizeof(buffer), stdin);
+	*strchr(buffer, '\n') = 0;
+	sprintf(temp, "%s", buffer);	
+      }
+      else if(turn == 4){
+	int card = 0;
+	while(!card){
+	  printf("Your sacrifice: ");
+	  fgets(buffer, sizeof(buffer), stdin);
+	  if(!(buffer[0] == '\n')){
+	    *strchr(buffer, '\n') = 0;
+	    card = process_input(buffer,arr);
+	  }
+	}
+	sprintf(temp,"%d", card / -1);
+      }
       else if(turn == 9){
 	exit(0);
       }
    
       write(server_socket, temp, sizeof(temp));
-      //printf("Sent [%s] to server\n", temp);
+      printf("Sent [%s] to server\n", temp);
     }
   }
 }
@@ -104,11 +124,11 @@ int main(int argc, char **argv) {
 int process_input(char * buffer, char ** arr){
   int index = atoi(buffer);
   int card = 0;
-  //printf("index: %d",index);
+  printf("index: %\n",index);
   if(index < 29 && arr[index]){
     card = cardtoint(arr[index]);
   }
-  //printf("card at index: %d",card);
+  printf("card at index: %d\n",card);
   if(!card){
     printf("Invalid input. Please try again!\n");
   }
@@ -117,7 +137,7 @@ int process_input(char * buffer, char ** arr){
 
 
 int cardtoint(char * cardstring){
-  //printf("==%s==",cardstring);
+  printf("==%s==\n",cardstring);
   if(strchr(cardstring, ']')){
     char * bracket = strchr(cardstring, ']');
     if(bracket[1] == ' '){
