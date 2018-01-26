@@ -95,12 +95,15 @@ implemented exploding kittens
 mansourE + henryZ -- 2018-01-25 01:59
 implemented endgame and fixed notification bug
 
-elsharawyM -- 2018-01-25 11:43
+mansourE -- 2018-01-25 11:43
 improved status messages
 
-elsharawyM+zhengH -- 2018-01-25 12:09
+mansourE + henryZ -- 2018-01-25 12:09
 fixed reverse update bug and extraneous space
 
 henryZ -- 2018-01-25 13:03
 added/changed HAND_SIZE to 27
+
+shakilR -- 2018-01-25 21:16
+show IP addresses and prompt for IP address to connect to 
 

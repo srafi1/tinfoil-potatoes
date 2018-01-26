@@ -9,13 +9,13 @@ void error_check( int i, char *s ) {
 
 /*=========================
   server_setup
-  args:
+args:
 
-  creates, binds a server side socket
-  and sets it to the listening state
+creates, binds a server side socket
+and sets it to the listening state
 
-  returns the socket descriptor
-  =========================*/
+returns the socket descriptor
+=========================*/
 int server_setup() {
   int sd, i;
 
@@ -33,6 +33,23 @@ int server_setup() {
   hints->ai_socktype = SOCK_STREAM;  //TCP socket
   hints->ai_flags = AI_PASSIVE;  //Use all valid addresses
   getaddrinfo(NULL, PORT, hints, &results); //NULL means use local address
+  struct ifaddrs* addrs;
+  getifaddrs(&addrs);
+  struct ifaddrs* tmp = addrs;
+  printf("Available IP addresses:\n");
+
+  while (tmp) 
+  {
+    if (tmp->ifa_addr && tmp->ifa_addr->sa_family == AF_INET)
+    {
+      struct sockaddr_in *pAddr = (struct sockaddr_in *)tmp->ifa_addr;
+      printf("\t%s\n", inet_ntoa(pAddr->sin_addr));
+    }
+
+    tmp = tmp->ifa_next;
+  }
+
+  freeifaddrs(addrs);
 
   //bind the socket to address and port
   i = bind( sd, results->ai_addr, results->ai_addrlen );
@@ -54,14 +71,14 @@ int server_setup() {
 
 /*=========================
   server_connect
-  args: int sd
+args: int sd
 
-  sd should refer to a socket in the listening state
-  run the accept call
+sd should refer to a socket in the listening state
+run the accept call
 
-  returns the socket descriptor for the new socket connected
-  to the client.
-  =========================*/
+returns the socket descriptor for the new socket connected
+to the client.
+=========================*/
 int server_connect(int sd) {
   int client_socket;
   socklen_t sock_size;
@@ -78,15 +95,15 @@ int server_connect(int sd) {
 
 /*=========================
   client_setup
-  args: int * to_server
+args: int * to_server
 
-  to_server is a string representing the server address
+to_server is a string representing the server address
 
-  create and connect a socket to a server socket that is
-  in the listening state
+create and connect a socket to a server socket that is
+in the listening state
 
-  returns the file descriptor for the socket
-  =========================*/
+returns the file descriptor for the socket
+=========================*/
 int client_setup(char * server) {
   int sd, i;
 

@@ -3,7 +3,7 @@
 char * strsepstr(char ** s, char * delim);
 int process_input(char * buffer, char ** arr);
 int cardtoint(char * cardstring);
-  
+
 int main(int argc, char **argv) {
 
   int server_socket;
@@ -11,8 +11,13 @@ int main(int argc, char **argv) {
   char buffer[BUFFER_SIZE];
   memset(buffer,0,BUFFER_SIZE);
 
-  if (argc == 2)
-    server_socket = client_setup( argv[1]);
+  printf("Enter IP address to connect to (default: 127.0.0.1): ");
+  fgets(buffer, BUFFER_SIZE, stdin);
+
+  *strchr(buffer, '\n') = 0;
+
+  if (buffer[0])
+    server_socket = client_setup(buffer);
   else
     server_socket = client_setup( TEST_IP );
 
@@ -42,79 +47,79 @@ int main(int argc, char **argv) {
     char * line3 = strcpy(line2, buffer);
     char ** arr = (char**)malloc(20* sizeof(char*));
     memset(arr,0,50);
-    
+
     if(line3){
       //printf("1");
       int i = 0;
       while(line3){
-	//printf("2");
-	arr[i] = strsepstr(&line3," [");
-	i++;
+        //printf("2");
+        arr[i] = strsepstr(&line3," [");
+        i++;
       }
       //printf("3");
 
       /*      i=0;
-      for(i;i<20;i++){
-	printf("arr[%d]: %s\n",i,arr[i]);
-      }
-      printf("\n\n\n\n");
-      */
+              for(i;i<20;i++){
+              printf("arr[%d]: %s\n",i,arr[i]);
+              }
+              printf("\n\n\n\n");
+              */
     }
-    
+
 
     if (turn) {
       char temp[BUFFER_SIZE];
       memset(temp,0,BUFFER_SIZE);
       memset(buffer,0,BUFFER_SIZE);
       if(turn == 1){
-	int card = 0;
-	while(!card){
-	  printf("Your move: ");
-	  fgets(buffer, sizeof(buffer), stdin);
-	  if(!(buffer[0] == '\n')){
-	    *strchr(buffer, '\n') = 0;
-	    card = process_input(buffer,arr);
-	  }
+        int card = 0;
+        while(!card){
+          printf("Your move: ");
+          fgets(buffer, sizeof(buffer), stdin);
+          if(!(buffer[0] == '\n')){
+            *strchr(buffer, '\n') = 0;
+            card = process_input(buffer,arr);
+          }
 
-	  else{
-	    *strchr(buffer, '\n') = 0;
-	    card = 99;
-	    break;
-	  }
+          else{
+            *strchr(buffer, '\n') = 0;
+            card = 99;
+            break;
+          }
 
-	}
-	
-	sprintf(temp,"%d",card);
+        }
+
+        sprintf(temp,"%d",card);
       }
       else if(turn == 2){
-	printf("Pick a deck index: ");
-	fgets(buffer, sizeof(buffer), stdin);
-	*strchr(buffer, '\n') = 0;
-	int index = atoi(buffer);
-	sprintf(temp, "%d",index);
+        printf("Pick a deck index: ");
+        fgets(buffer, sizeof(buffer), stdin);
+        *strchr(buffer, '\n') = 0;
+        int index = atoi(buffer);
+        sprintf(temp, "%d",index);
       }
       else if(turn == 3){
-	printf("Pick a player: ");
-	fgets(buffer, sizeof(buffer), stdin);
-	*strchr(buffer, '\n') = 0;
-	sprintf(temp, "%s", buffer);	
+        printf("Pick a player: ");
+        fgets(buffer, sizeof(buffer), stdin);
+        *strchr(buffer, '\n') = 0;
+        sprintf(temp, "%s", buffer);	
       }
       else if(turn == 4){
-	int card = 0;
-	while(!card){
-	  printf("Your sacrifice: ");
-	  fgets(buffer, sizeof(buffer), stdin);
-	  if(!(buffer[0] == '\n')){
-	    *strchr(buffer, '\n') = 0;
-	    card = process_input(buffer,arr);
-	  }
-	}
-	sprintf(temp,"%d", card / -1);
+        int card = 0;
+        while(!card){
+          printf("Your sacrifice: ");
+          fgets(buffer, sizeof(buffer), stdin);
+          if(!(buffer[0] == '\n')){
+            *strchr(buffer, '\n') = 0;
+            card = process_input(buffer,arr);
+          }
+        }
+        sprintf(temp,"%d", card / -1);
       }
       else if(turn == 9){
-	exit(0);
+        exit(0);
       }
-   
+
       write(server_socket, temp, sizeof(temp));
       printf("Sent [%s] to server\n", temp);
     }
@@ -186,7 +191,7 @@ int cardtoint(char * cardstring){
   }
 }
 
- 
+
 char * strsepstr(char ** s, char * delim){
   char * found = strstr(*s,delim);
   //printf("[%s]",found);
