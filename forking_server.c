@@ -812,7 +812,7 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     strcat(output, "Choose a player to steal from:\n");
     int i = 0;
     for(i;i<6;i++){
-      if(state->players[i].name[0] && i != playerindex){
+      if(state->players[i].name[0] && i != playerindex && state->players[i].alive){
         strcat(output, state->players[i].name);
         strcat(output, "\n");	
       }

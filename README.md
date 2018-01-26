@@ -4,19 +4,21 @@
 In-terminal implementation of the Exploding Kittens card game over a network.
 
 ## Dependencies
-* `[INSERT DEPENDENCIES HERE]`
+* none
 
 ## File Structure
 ```
 cards.c
+cards.h
 client.c
 DESIGN
 DEVLOG
+forking_server.c
 log.sh
 makefile
 networking.c
+networking.h
 README.md
-server.c
 ```
 
 ## Launch Instructions

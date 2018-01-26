@@ -124,6 +124,10 @@ int client_setup(char * server) {
   //connect will bind the socket for us
   i = connect( sd, results->ai_addr, results->ai_addrlen );
   error_check( i, "client connect" );
+  if (i < 0) {
+    printf("Bad IP address\n");
+    exit(0);
+  }
 
   free(hints);
   freeaddrinfo(results);
