@@ -44,6 +44,7 @@ int main(int argc, char **argv) {
     printf("%s\n", data);    
 
     char * line2 = (char*)malloc(200);
+    memset(line2,0,200);
     char * line3 = strcpy(line2, buffer);
     char ** arr = (char**)malloc(20* sizeof(char*));
     memset(arr,0,50);
@@ -68,14 +69,14 @@ int main(int argc, char **argv) {
     
 
     if (turn) {
-      char temp[50];
+      char temp[5];
       memset(buffer,0,BUFFER_SIZE);
       if(turn == 1){
  	printf("Your move: ");
  	fgets(buffer, sizeof(buffer), stdin);
  	*strchr(buffer, '\n') = 0;
  	int card = process_input(buffer,arr);
-	/*	if(card > 7){
+	if(card > 7){
 	  int i = 0;
 	  int count = 0;
 	  for(i;i<20 && arr[i];i++){
@@ -87,10 +88,10 @@ int main(int argc, char **argv) {
 	    card += 200;    
 	  }
 	  else if(count > 2){
-	    //card += 300;
+	    card += 300;
 	  }
 	  
-	  }*/
+	  }
 	sprintf(temp,"%d",card);
       }
       else if(turn == 2){
@@ -104,7 +105,7 @@ int main(int argc, char **argv) {
 	printf("Pick a player: ");
 	fgets(buffer, sizeof(buffer), stdin);
 	*strchr(buffer, '\n') = 0;
-	sprintf(temp, "%s", buffer);	
+	sprintf(temp, "%d", atoi(buffer));	
       }
       else if(turn == 4){
  	printf("Your sacrifice: ");
@@ -117,7 +118,7 @@ int main(int argc, char **argv) {
  	printf("Card of choice: ");
  	fgets(buffer, sizeof(buffer), stdin);
  	*strchr(buffer, '\n') = 0;
-	sprintf(temp,"%s",buffer);
+	sprintf(temp,"%d",atoi(buffer));
       }
       else if(turn == 9){
 	exit(0);

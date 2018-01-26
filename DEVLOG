@@ -113,3 +113,6 @@ fixed a memset issue in cardtotext
 mansourE -- 2018-01-26 01:54
 memset and favor dead people buug fixed after branch merge
 
+mansourE + henryZ -- 2018-01-26 05:27
+reformatted player selection inputs and some bugfixes
+
