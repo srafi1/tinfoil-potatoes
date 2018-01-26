@@ -11,8 +11,13 @@ int main(int argc, char **argv) {
   char buffer[BUFFER_SIZE];
   memset(buffer,0,BUFFER_SIZE);
 
-  if (argc == 2)
-    server_socket = client_setup( argv[1]);
+  printf("Enter IP address to connect to (default: 127.0.0.1): ");
+  fgets(buffer, BUFFER_SIZE, stdin);
+
+  *strchr(buffer, '\n') = 0;
+
+  if (buffer[0])
+    server_socket = client_setup(buffer);
   else
     server_socket = client_setup( TEST_IP );
 
