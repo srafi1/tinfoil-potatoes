@@ -68,13 +68,29 @@ int main(int argc, char **argv) {
     
 
     if (turn) {
-      char temp[5];
+      char temp[50];
       memset(buffer,0,BUFFER_SIZE);
       if(turn == 1){
  	printf("Your move: ");
  	fgets(buffer, sizeof(buffer), stdin);
  	*strchr(buffer, '\n') = 0;
  	int card = process_input(buffer,arr);
+	/*	if(card > 7){
+	  int i = 0;
+	  int count = 0;
+	  for(i;i<20 && arr[i];i++){
+	    if(cardtoint(arr[i]) == card){
+	      count++;
+	    }
+	  }
+	  if(count == 2){
+	    card += 200;    
+	  }
+	  else if(count > 2){
+	    //card += 300;
+	  }
+	  
+	  }*/
 	sprintf(temp,"%d",card);
       }
       else if(turn == 2){
@@ -96,6 +112,12 @@ int main(int argc, char **argv) {
  	*strchr(buffer, '\n') = 0;
  	int card = process_input(buffer,arr);
 	sprintf(temp,"%d", card / -1);
+      }
+      else if(turn == 5){
+ 	printf("Card of choice: ");
+ 	fgets(buffer, sizeof(buffer), stdin);
+ 	*strchr(buffer, '\n') = 0;
+	sprintf(temp,"%s",buffer);
       }
       else if(turn == 9){
 	exit(0);
@@ -165,6 +187,7 @@ int cardtoint(char * cardstring){
     return 0;
   }
 }
+
 
  
 char * strsepstr(char ** s, char * delim){

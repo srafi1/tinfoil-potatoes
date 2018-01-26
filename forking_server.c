@@ -876,6 +876,246 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
 
   }
 
+  else if(input > 200){
+    strcpy(output, "3 ");
+    strcat(output, "Choose a player to steal from:\n");
+    int i = 0;
+    for(i;i<6;i++){
+      if(state->players[i].name[0] && i != playerindex && state->players[i].alive){
+	strcat(output, state->players[i].name);
+	strcat(output, "\n");	
+      }
+    }
+    char tmp[50];
+    write(client_socket,output, BUFFER_SIZE);
+    memset(output,0,BUFFER_SIZE);
+    memset(tmp,0,50);
+    read(client_socket,tmp,BUFFER_SIZE);
+
+    if(input < 300){
+      //DOUBLE CODE
+      strcpy(output,"1 ");
+      
+      i = 0;
+      int victim = 0;
+      for(i;i<6;i++){
+	if(strcmp(state->players[i].name,tmp) == 0){
+	  victim = i;
+	  break;
+	}
+      }
+
+      i = 0;
+      int end = 20;
+      for(i;i < 20; i++){
+	if(state->players[victim].hand[i] == NONE){
+	  end = i;
+	  break;
+	}
+      }
+
+      int randint;
+      srand(time(NULL));
+      randint = rand() % end;
+
+      i = randint;
+      int newcard =  state->players[victim].hand[randint];
+      state->players[victim].hand[randint] = NONE;
+
+      for(i; i<20;i++){
+	if(state->players[victim].hand[i+1]){
+	  state->players[victim].hand[i] = state->players[victim].hand[i+1];
+	}
+      }
+      
+      i=0;
+      for(i;i<20;i++){
+	int card = (state->players[playerindex]).hand[i];
+	if(card == NONE){
+	  break;
+	}
+      }
+      (state->players[playerindex]).hand[i] = newcard;
+      (state->players[playerindex]).hand[i+1] = NONE;
+
+      int j = 0;
+	
+      for(j;j<2;j++){
+	i = 0;
+	for(i; i<20; i++){
+	  if(state->players[playerindex].hand[i] == input - 200){
+	    state->players[playerindex].hand[i] = NONE;
+	    break;
+	  }
+	}
+
+	for(i; i<20;i++){
+	  if(state->players[playerindex].hand[i+1]){
+	    state->players[playerindex].hand[i] = state->players[playerindex].hand[i+1];
+	  }
+	}
+      }
+      
+      char tomp[256];
+      sprintf(tomp, "%s played two cards and got a random card from %s!\n", state->players[playerindex].name, state->players[victim].name);
+      strcat(state->testing, tomp);
+      memset(tomp,0,256);
+      
+      sprintf(tomp, "You got a %s from %s!\n", cardtotext(newcard), state->players[victim].name);
+      strcat(output,tomp);
+
+      strcat(output, " Your hand: ");
+      j=0;
+      for (j;j<20;j++){
+	int card = (state->players[playerindex]).hand[j];
+	if(card == NONE){
+	  break;
+	}
+	char temp[256];
+	sprintf(temp,"[%s] ", cardtotext(card));
+	strcat(output, temp);
+      }
+      strcat(output, "\n");
+
+      
+
+    }
+    else{
+      //TRIPLE CODE
+      strcpy(output,"5 ");
+
+      i = 0;
+      int victim = 0;
+      for(i;i<6;i++){
+	if(strcmp(state->players[i].name,tmp) == 0){
+	  victim = i;
+	  break;
+	}
+      }
+      char temp[256];
+      sprintf(temp,"State the card you would like from %s (TYPE IT EXACTLY AS IT APPEARS):\n", state->players[victim].name);
+      strcat(output, temp);
+      write(client_socket, output, BUFFER_SIZE);
+      memset(temp,0,256);
+      memset(output,0,BUFFER_SIZE);
+      read(client_socket, temp, BUFFER_SIZE);
+      strcpy(output, "1 ");
+
+      i=1;
+      int chosen = 0;
+      printf("chosen: %d\n",chosen);
+      for(i;i<13;i++){
+	printf("***temp: %s***\n",temp);
+	printf("***CTT: %s***\n",cardtotext(i));
+	if(strcmp(cardtotext(i), temp) == 0){
+	  chosen = i;
+	  printf("chosen: %d\n",chosen);
+	  break;
+	}
+      }
+
+      printf("chosen: %d\n",chosen);
+
+      i = 0;
+      int found = 0;
+      for(i;i<20;i++){
+	if(state->players[victim].hand[i] == chosen){
+	  found = 1;
+	  break;
+	}
+      }
+
+      printf("chosen: %d\n",chosen);
+
+      printf("!!!!A!!!!: %d", i);
+      if(found){
+
+	state->players[victim].hand[i] = NONE;
+	printf("!!!!B!!!!: %d", i);
+	for(i; i<20;i++){
+	  if(state->players[victim].hand[i+1]){
+	    printf("!!!!C!!!!: %d", i);
+	    state->players[victim].hand[i] = state->players[victim].hand[i+1];
+	  }
+	}
+
+	printf("chosen: %d\n",chosen);
+	
+	
+	printf("!!!!D!!!!: %d", i);
+	i=0;
+	for(i;i<20;i++){
+	  int card = (state->players[playerindex]).hand[i];
+	  if(card == NONE){
+	    break;
+	  }
+	}
+	(state->players[playerindex]).hand[i] = chosen;
+	(state->players[playerindex]).hand[i+1] = NONE;
+
+	printf("chosen: %d\n",chosen);
+
+	int j = 0;
+	
+	for(j;j<3;j++){
+	  i = 0;
+	  for(i; i<20; i++){
+	    if(state->players[playerindex].hand[i] == input - 300){
+	      state->players[playerindex].hand[i] = NONE;
+	      break;
+	    }
+	  }
+	  
+	  for(i; i<20;i++){
+	    if(state->players[playerindex].hand[i+1]){
+	      state->players[playerindex].hand[i] = state->players[playerindex].hand[i+1];
+	    }
+	  }
+	}
+
+	printf("chosen: %d\n",chosen);
+
+	char tomp[256];
+	sprintf(tomp, "%s played three cards and got a %s card from %s!\n", state->players[playerindex].name, cardtotext(chosen) ,state->players[victim].name);
+	strcat(state->testing, tomp);
+	memset(tomp,0,256);
+
+	sprintf(tomp, "You got a %s from %s!\n", cardtotext(chosen), state->players[victim].name);
+	strcat(output,tomp);
+
+	strcat(output, " Your hand: ");
+	j=0;
+	for (j;j<20;j++){
+	  int card = (state->players[playerindex]).hand[j];
+	  if(card == NONE){
+	    break;
+	  }
+	  char temp[256];
+	  sprintf(temp,"[%s] ", cardtotext(card));
+	  strcat(output, temp);
+	}
+	strcat(output, "\n");
+	
+	
+      }
+      else{
+	strcat(output, "They didn't have that card! Better luck next time! ¯\\_(ツ)_/¯\n");
+	char tomp[256];
+	sprintf(tomp, "%s played three cards, asked for a %s card from %s, but they didn't have any!\n", state->players[playerindex].name, cardtotext(chosen) ,state->players[victim].name);
+	strcat(state->testing, tomp);
+	memset(tomp,0,256);
+      }
+      
+    }
+
+    write(client_socket, output, BUFFER_SIZE);
+    read(client_socket, buffer, BUFFER_SIZE);
+    printf("Received [%s] from client",buffer);
+    process_action(client_socket,state,buffer,playerindex,0);
+    
+
+  }
+
   printf("processing: %s\n",state->testing);
   
 
@@ -1014,6 +1254,7 @@ char * draw(int client_socket, struct game_state *state, int playerindex){
 
 char * cardtotext(int cardid){
   char * result = malloc(30);
+  memset(result,0,30);
 
   if(cardid == 0){
     strcpy(result,"EXPLODING KITTEN");
