@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
   while (read(server_socket, buffer, sizeof(buffer))) {
     //read update
     //printf("-1");
-    //printf("Received [%s] from server\n\n\n", buffer);
+    printf("Received [%s] from server\n\n\n", buffer);
     //printf("0");
     int turn;
     char data[256];
@@ -64,11 +64,12 @@ int main(int argc, char **argv) {
 
     if (turn) {
       char temp[5];
+      memset(buffer,0,BUFFER_SIZE);
       if(turn == 1){
-	printf("Your move: ");
-	fgets(buffer, sizeof(buffer), stdin);
-	*strchr(buffer, '\n') = 0;
-	int card = process_input(buffer,arr);
+ 	printf("Your move: ");
+ 	fgets(buffer, sizeof(buffer), stdin);
+ 	*strchr(buffer, '\n') = 0;
+ 	int card = process_input(buffer,arr);
 	sprintf(temp,"%d",card);
       }
       else if(turn == 2){
@@ -78,27 +79,40 @@ int main(int argc, char **argv) {
 	int index = atoi(buffer);
 	sprintf(temp, "%d",index);
       }
+      else if(turn == 3){
+	printf("Pick a player: ");
+	fgets(buffer, sizeof(buffer), stdin);
+	*strchr(buffer, '\n') = 0;
+	sprintf(temp, "%s", buffer);	
+      }
+      else if(turn == 4){
+ 	printf("Your sacrifice: ");
+ 	fgets(buffer, sizeof(buffer), stdin);
+ 	*strchr(buffer, '\n') = 0;
+ 	int card = process_input(buffer,arr);
+	sprintf(temp,"%d", card / -1);
+      }
       else if(turn == 9){
 	exit(0);
       }
    
       write(server_socket, temp, sizeof(temp));
-      //printf("Sent [%s] to server\n", temp);
+      printf("Sent [%s] to server\n", temp);
     }
   }
 }
 
 int process_input(char * buffer, char ** arr){
   int index = atoi(buffer);
-  //printf("index: %d",index);
+  //printf("index: %\n",index);
+  //printf("card at index: %d\n",card);
   int card = cardtoint(arr[index]);
-  //printf("card at index: %d",card);
   return card;
 }
 
 
 int cardtoint(char * cardstring){
-  //printf("==%s==",cardstring);
+  printf("==%s==\n",cardstring);
   if(strchr(cardstring, ']')){
     char * bracket = strchr(cardstring, ']');
     if(bracket[1] == ' '){
