@@ -10,6 +10,9 @@ For the full set of rules and mechanics, visit the following link: [FULL RULES](
 * There is no five distinct cards feature
 * Do not attempt to give unsolicited user input. Doing so will break the game. Badly.
 * Do not attempt to play less than three players or more than six players.
+* Selecting a "normal" card will result in a two of a kind play if there are two of said card in your hand, and three if there are three of said card in your hand.
+* Do not select a "normal" card if it is alone in your hand.
+* Do not select DEFUSE cards. This may or may not break the game.
 * There may be some unknown bugs lurking...
 * Some logistical information that would be known in an in-person environment are not included.
 
