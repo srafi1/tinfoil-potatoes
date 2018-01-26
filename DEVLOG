@@ -107,3 +107,6 @@ added/changed HAND_SIZE to 27
 shakilR -- 2018-01-25 21:16
 show IP addresses and prompt for IP address to connect to 
 
+elsharawyM -- 2018-01-25 22:26
+fixed a memset issue in cardtotext
+

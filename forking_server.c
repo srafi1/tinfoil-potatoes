@@ -1014,6 +1014,7 @@ char * draw(int client_socket, struct game_state *state, int playerindex){
 
 char * cardtotext(int cardid){
   char * result = malloc(30);
+  memset(result,0,30);
 
   if(cardid == 0){
     strcpy(result,"EXPLODING KITTEN");
