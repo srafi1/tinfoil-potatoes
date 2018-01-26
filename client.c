@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
   while (read(server_socket, buffer, sizeof(buffer))) {
     //read update
     //printf("-1");
-    printf("Received [%s] from server\n\n\n", buffer);
+    //printf("Received [%s] from server\n\n\n", buffer);
     //printf("0");
     int turn;
     char data[256];
@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
       }
    
       write(server_socket, temp, sizeof(temp));
-      printf("Sent [%s] to server\n", temp);
+      //printf("Sent [%s] to server\n", temp);
     }
   }
 }
@@ -140,11 +140,11 @@ int process_input(char * buffer, char ** arr){
 
 
 int cardtoint(char * cardstring){
-  printf("==%s==\n",cardstring);
+  //printf("==%s==\n",cardstring);
   if(strchr(cardstring, ']')){
     char * bracket = strchr(cardstring, ']');
     if(bracket[1] == ' '){
-      bracket[1] = NULL;
+      bracket[1] = 0;
     }
   }
 
@@ -202,7 +202,7 @@ char * strsepstr(char ** s, char * delim){
   //printf("%s\n",found);
   int i = 0;
   for(i;i<strlen(delim);i++){
-    found[i] = NULL;
+    found[i] = 0;
   }
   i+=1;
   i -= 1;
