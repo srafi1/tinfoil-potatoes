@@ -811,7 +811,7 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     strcat(output, "Choose a player to steal from:\n");
     int i = 0;
     for(i;i<6;i++){
-      if(state->players[i].name[0] && i != playerindex){
+      if(state->players[i].name[0] && i != playerindex && state->players[i].alive){
 	strcat(output, state->players[i].name);
 	strcat(output, "\n");	
       }
@@ -907,6 +907,7 @@ char * thefuture(struct game_state * state){
 
 char * draw(int client_socket, struct game_state *state, int playerindex){
   char * outputstring = malloc(BUFFER_SIZE);
+  memset(outputstring,0,BUFFER_SIZE);
   strcat(outputstring, "2 ");
   //Removes card from end of deck
   int i = 0;
