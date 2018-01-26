@@ -132,9 +132,9 @@ int main(int argc, char **argv) {
 
 int process_input(char * buffer, char ** arr){
   int index = atoi(buffer);
-  //printf("index: %\n",index);
-  //printf("card at index: %d\n",card);
+  //printf("index: %d\n",index);
   int card = cardtoint(arr[index]);
+  //printf("card at index: %d\n",card);
   return card;
 }
 
@@ -147,6 +147,8 @@ int cardtoint(char * cardstring){
       bracket[1] = 0;
     }
   }
+  //printf("==%s==\n",cardstring);
+
 
   if(strcmp(cardstring,"DEFUSE]") == 0){
     return 1;

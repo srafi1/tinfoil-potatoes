@@ -494,7 +494,7 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
   
   int i = 0;
   for(i; i<20; i++){
-    if(state->players[playerindex].hand[i] == abs(input)){
+    if(state->players[playerindex].hand[i] == abs(input) && input != 1){
       state->players[playerindex].hand[i] = NONE;
       break;
     }
@@ -504,6 +504,28 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
     if(state->players[playerindex].hand[i+1]){
       state->players[playerindex].hand[i] = state->players[playerindex].hand[i+1];
     }
+  }
+
+  if(input == 1){
+    strcpy(output, "1 ");
+
+    int j = 0;
+    strcat(output, " Your hand: ");
+    for (j;j<20;j++){
+      int card = (state->players[playerindex]).hand[j];
+      if(card == NONE){
+	break;
+      }
+      char temp[256];
+      sprintf(temp,"[%s] ", cardtotext(card));
+      strcat(output, temp);
+    }
+    strcat(output, "\n");
+    strcat(output, "You dumdum, you can't play a defuse card!\n");
+
+    write(client_socket,output,BUFFER_SIZE);
+    read(client_socket, buffer, BUFFER_SIZE);    
+    process_action(client_socket,state,buffer,playerindex,0);
   }
 
   //ENTER WILL REPRESENT DRAWING A CARD

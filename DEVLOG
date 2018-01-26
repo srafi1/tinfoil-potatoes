@@ -116,3 +116,9 @@ memset and favor dead people buug fixed after branch merge
 mansourE + henryZ -- 2018-01-26 05:27
 reformatted player selection inputs and some bugfixes
 
+mansourE + henryZ -- 2018-01-26 05:50
+removed debugging print statements
+
+mansourE + henryZ -- 2018-01-26 06:18
+final tests and commits
+
