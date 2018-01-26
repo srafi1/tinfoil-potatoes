@@ -1156,6 +1156,7 @@ void process_action(int client_socket, struct game_state *state, char * buffer, 
 char * thefuture(struct game_state * state){
   int i = 0;
   char * thefuture = malloc(100);
+  memset(thefuture,0,100);
 
   int end = 57;
   for(i;i < 57; i++){
